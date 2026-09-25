@@ -1,4 +1,11 @@
 #include "Graphics.hpp"
+#include "myExceptions.hpp"
+#include "SDL2/SDL.h"
+#include "SDL2/SDL_ttf.h"
+#include<vector>
+#include<iostream>
+using namespace std;
+
 SDL_Color Graphics::whiteColor(){return SDL_Color{250, 250, 250};}
 SDL_Color Graphics::blackColor(){return SDL_Color{1,1,1};}
 SDL_Color Graphics::brownColor(){return SDL_Color{130,80,0};}
@@ -15,4 +22,95 @@ SDL_Color Graphics::yellowColor(){
 SDL_Color Graphics::turquoiseColor(){
 	return SDL_Color{12,227,235};
 }
-TTF_Font* Graphics::theFont;
+Graphics::Font* Graphics::theFont;
+Graphics::Font::Font(std::string filename, int fontSize):m_fontSize(fontSize)
+{m_font = TTF_OpenFont(filename.c_str(), m_fontSize);}
+
+//From here, it's legacy code
+
+int SDL_SetRenderDrawColor(SDL_Renderer* renderer, SDL_Color color){
+	return SDL_SetRenderDrawColor(renderer, (unsigned char) color.r,(unsigned char)color.g,(unsigned char)color.b,(unsigned char)color.a);
+}
+
+SDL_Rect Graphics::printMultipleLines(const std::string& str, int x, int y, SDL_Color color, SDL_Renderer* renderer,  bool shaded, SDL_Color backgroundColor){
+	int maxWidth = 0,
+	height = 0;
+	std::string stringOfInterest = str;
+	if(stringOfInterest.back()!='\n')
+		stringOfInterest+="\n";
+	std::cout<<str<<"\n"<<"SDL_Error in printMultipleLines: "<<SDL_GetError()<<std::endl;
+	std::string temporaryString = "";
+	int length = stringOfInterest.length();
+	int reachedHeight = 0;
+	std::vector<SDL_Surface*> textures;
+	for(int i(0); i<length; i++){
+		if(stringOfInterest[i] != '\n'){
+			temporaryString += stringOfInterest[i];
+			continue;
+		}
+		else{
+			SDL_Surface* surface = TTF_RenderText_Blended(Graphics::theFont->m_get(), temporaryString.c_str(), color);
+			//	std::cout<<temporaryString<<std::endl;
+			temporaryString = "";
+			if(!surface){
+				continue;
+			}
+			maxWidth=std::max(maxWidth,surface->w);
+			height+=surface->h;
+			textures.push_back(surface);
+		}
+	}
+	SDL_Rect rectToFill{x,y,maxWidth,height};
+	if(shaded){
+		SDL_Color oldRenderDrawColor;
+		SDL_GetRenderDrawColor(renderer,&(oldRenderDrawColor.r),&(oldRenderDrawColor.g),&(oldRenderDrawColor.b),&(oldRenderDrawColor.a));
+		SDL_SetRenderDrawColor(renderer, backgroundColor);
+		SDL_RenderFillRect(renderer, &rectToFill);
+		SDL_SetRenderDrawColor(renderer, oldRenderDrawColor);
+	}
+	for(SDL_Surface* currentSurface: textures){
+		SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, currentSurface);
+		SDL_Rect textRect{x, reachedHeight+y, currentSurface->w, currentSurface->h};
+		reachedHeight+=currentSurface->h;
+		SDL_RenderCopy(renderer, texture, nullptr,&textRect);
+		SDL_FreeSurface(currentSurface);
+		SDL_DestroyTexture(texture);
+	}
+	SDL_RenderPresent(renderer);
+	return rectToFill;
+}
+
+
+SDL_Rect Graphics::displayText(const std::string& str, int x, int y, SDL_Color color, SDL_Renderer* renderer, bool shaded, SDL_Color backgroundColor){
+	SDL_Rect whatToReturn = printMultipleLines(str,x,y,color,renderer,shaded,backgroundColor);
+	SDL_RenderPresent(renderer);
+	SDL_Event e;
+	bool quitSurface = false;
+	while(!quitSurface){
+		try{
+		while(SDL_PollEvent(&e)){
+			if(e.type == SDL_QUIT){
+				throw SDLQuitException();
+			}
+			if(e.type==SDL_KEYDOWN || e.type==SDL_MOUSEBUTTONDOWN){
+				quitSurface = true;
+			}
+		}
+		}
+		catch(QuitSurface &qs){
+			quitSurface = true;
+		}
+		catch(SDLQuitException& sdlqe){
+			throw sdlqe;
+		}
+	}
+	return whatToReturn;
+}
+
+SDL_Rect Graphics::printMultipleLines(const std::string& str, int x, int y, SDL_Color color, SDL_Renderer* renderer, SDL_Color backgroundColor){
+	std::cout<<"Text: "<<str<<std::endl;
+	return Graphics::printMultipleLines(str, x, y, color, renderer, true, backgroundColor);
+}
+std::ostream& operator<<(std::ostream& os, const SDL_Rect& rect){
+	return os<<"SDL_Rect{x = "<<rect.x<<", y = "<<rect.y<<", w = "<<rect.w<<", h = "<<rect.h<<"}";
+}

@@ -17,10 +17,10 @@ Window* theWindow = nullptr;
 Window::Window(std::string name, unsigned int width, unsigned int height)
 :m_name(name), m_width(width), m_height(height)
 {
-	
+
 }
 
-ErrorCode Window::m_Init()
+ErrorCode Window::m_init()
 {
 	m_window = SDL_CreateWindow(m_name.c_str(), SDL_WINDOWPOS_UNDEFINED
 			  , SDL_WINDOWPOS_UNDEFINED
@@ -29,6 +29,7 @@ ErrorCode Window::m_Init()
 	if(m_window == nullptr){
 		return ErrorCode::FAILURE;
 	}
+	m_drawing = std::make_unique<Drawing>(m_renderer);
 	return ErrorCode::OK;
 }
 
