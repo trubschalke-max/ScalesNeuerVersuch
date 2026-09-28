@@ -30,10 +30,13 @@ SDL_Color blackColor();
 SDL_Color brownColor();
 SDL_Color infoTextColor();
 SDL_Color infoTextBackgroundColor();
+SDL_Color errorColor();
 extern Font* theFont;
 SDL_Rect displayText(const std::string& str, int x, int y, SDL_Color color, SDL_Renderer* renderer, bool shaded, SDL_Color backgroundColor);
 SDL_Rect printMultipleLines(const std::string& str, int x, int y, SDL_Color color, SDL_Renderer* renderer, bool shaded = false, SDL_Color backgroundColor = SDL_Color{0, 0, 0});
 SDL_Rect printMultipleLines(const std::string& str, int x, int y, SDL_Color color, SDL_Renderer* renderer, SDL_Color backgroundColor);
+
+bool isWithinRect(int x, int y, SDL_Rect& rect);
 }
 std::ostream& operator<<(std::ostream& os, const SDL_Rect& rect);
 

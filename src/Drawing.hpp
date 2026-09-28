@@ -10,11 +10,12 @@ class Drawing{
 private:    
     std::list<GameObject*> m_queue; //high layers at the end
     SDL_Renderer* m_renderer;
-    public:
+public:
     Drawing(SDL_Renderer* renderer);
     ErrorCode m_draw();
     ErrorCode m_add(GameObject*);
     ErrorCode m_remove(GameObject*);
+    SDL_Renderer* m_Renderer(){return m_renderer;}
 };
 
 #endif

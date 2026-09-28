@@ -22,6 +22,7 @@ SDL_Color Graphics::yellowColor(){
 SDL_Color Graphics::turquoiseColor(){
 	return SDL_Color{12,227,235};
 }
+SDL_Color Graphics::errorColor(){return SDL_Color{140, 140, 30};}
 Graphics::Font* Graphics::theFont;
 Graphics::Font::Font(std::string filename, int fontSize):m_fontSize(fontSize)
 {m_font = TTF_OpenFont(filename.c_str(), m_fontSize);}
@@ -76,14 +77,12 @@ SDL_Rect Graphics::printMultipleLines(const std::string& str, int x, int y, SDL_
 		SDL_FreeSurface(currentSurface);
 		SDL_DestroyTexture(texture);
 	}
-	SDL_RenderPresent(renderer);
 	return rectToFill;
 }
 
 
 SDL_Rect Graphics::displayText(const std::string& str, int x, int y, SDL_Color color, SDL_Renderer* renderer, bool shaded, SDL_Color backgroundColor){
 	SDL_Rect whatToReturn = printMultipleLines(str,x,y,color,renderer,shaded,backgroundColor);
-	SDL_RenderPresent(renderer);
 	SDL_Event e;
 	bool quitSurface = false;
 	while(!quitSurface){
@@ -111,6 +110,20 @@ SDL_Rect Graphics::printMultipleLines(const std::string& str, int x, int y, SDL_
 	std::cout<<"Text: "<<str<<std::endl;
 	return Graphics::printMultipleLines(str, x, y, color, renderer, true, backgroundColor);
 }
+
+bool Graphics::isWithinRect(int x, int y, SDL_Rect& rect){
+	 // Too far left
+    if (x < rect.x) return false;
+    // Too far right
+    if (x > rect.x + rect.w) return false;
+    // Too far up
+    if (y < rect.y) return false;
+    // Too far down
+    if (y > rect.y + rect.h) return false;
+
+	return true;
+}
+
 std::ostream& operator<<(std::ostream& os, const SDL_Rect& rect){
 	return os<<"SDL_Rect{x = "<<rect.x<<", y = "<<rect.y<<", w = "<<rect.w<<", h = "<<rect.h<<"}";
 }

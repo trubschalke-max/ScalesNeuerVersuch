@@ -5,6 +5,8 @@
 #include <iostream>
 #include<memory>
 #include "ClassicUnhoverableButtonElement.hpp"
+#include "ScaleElement.hpp"
+#include "EventHandler.hpp"
 
 
 Game::Game()
@@ -39,10 +41,11 @@ void Game::m_init(){
 }
 
 ErrorCode Game::m_simpleTest(){
-    std::unique_ptr<Button> myButton= std::make_unique<Button>(0, 30, 100, 100, "Testknopf", Button::ColorSet{Graphics::blackColor(), Graphics::whiteColor(), Graphics::yellowColor()});
-    m_mainWindow->m_Drawing().m_add(myButton.get());  
-    ErrorCode error = m_mainWindow->m_Drawing().m_draw();
-    SDL_RenderPresent(m_mainWindow->m_Renderer());
-    std::cout<<error<<std::endl;
-    return error;
+    Scale scale("above", "below", Scale::SCALE_1);
+    ScaleElement element = ScaleElement(0, 100, &scale);
+
+    Drawing drawing(m_mainWindow->m_Renderer());
+    drawing.m_add(&element);
+    Displayer e(&drawing);
+    return e.m_eventLoop();
 }

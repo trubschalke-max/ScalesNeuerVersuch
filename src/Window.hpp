@@ -20,7 +20,6 @@ private:
 	std::string m_name;
 	SDL_Renderer* m_renderer;
 	SDL_Window* m_window;
-	std::unique_ptr<Drawing> m_drawing;
 	//werd ich gucken m�ssen, ob list oder vector
 	//Idee: mehrere Drawings pro Window, dass man switchen kann.
 	unsigned int m_width;
@@ -33,11 +32,9 @@ private:
 	unsigned int m_Width();
 	SDL_Renderer* m_Renderer();
 	ErrorCode m_init();
-	std::string m_Name();
+	std::string m_Name(){return m_name;}
 	SDL_Window* m_Window(){return m_window;}
-	ErrorCode m_draw();
-	Drawing& m_Drawing(){return *m_drawing;}
-};
+	};
 
 extern Window* theWindow;
 

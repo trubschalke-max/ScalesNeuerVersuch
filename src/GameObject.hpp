@@ -17,6 +17,7 @@ protected:
 public:
     GameObject(int x, int y, Layer layer = DEFAULT_LAYER);
     virtual ErrorCode m_draw(SDL_Renderer* renderer) = 0;
+    virtual bool m_isHitBy(int x, int y) = 0;
     int m_X(){return m_x;}
     int m_Y(){return m_y;}
     int m_Layer(){return m_layer;}

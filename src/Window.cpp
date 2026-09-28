@@ -29,7 +29,6 @@ ErrorCode Window::m_init()
 	if(m_window == nullptr){
 		return ErrorCode::FAILURE;
 	}
-	m_drawing = std::make_unique<Drawing>(m_renderer);
 	return ErrorCode::OK;
 }
 
