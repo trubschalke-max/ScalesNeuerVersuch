@@ -6,6 +6,7 @@
 #include "ErrorCode.hpp"
 #include<iostream>
 #include<memory>
+#include <vector>
 
 namespace Graphics{
     class Font{
@@ -33,8 +34,10 @@ SDL_Color infoTextBackgroundColor();
 SDL_Color errorColor();
 extern Font* theFont;
 SDL_Rect displayText(const std::string& str, int x, int y, SDL_Color color, SDL_Renderer* renderer, bool shaded, SDL_Color backgroundColor);
+std::vector<SDL_Surface*> createSurfacesFromString(const std::string& str, SDL_Color color, SDL_Renderer* renderer, SDL_Rect* overallRect = nullptr);
 SDL_Rect printMultipleLines(const std::string& str, int x, int y, SDL_Color color, SDL_Renderer* renderer, bool shaded = false, SDL_Color backgroundColor = SDL_Color{0, 0, 0});
 SDL_Rect printMultipleLines(const std::string& str, int x, int y, SDL_Color color, SDL_Renderer* renderer, SDL_Color backgroundColor);
+ErrorCode FillRect(SDL_Rect rect, SDL_Color color, SDL_Renderer* renderer);
 
 bool isWithinRect(int x, int y, SDL_Rect& rect);
 }

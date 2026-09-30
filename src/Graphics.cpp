@@ -33,16 +33,14 @@ int SDL_SetRenderDrawColor(SDL_Renderer* renderer, SDL_Color color){
 	return SDL_SetRenderDrawColor(renderer, (unsigned char) color.r,(unsigned char)color.g,(unsigned char)color.b,(unsigned char)color.a);
 }
 
-SDL_Rect Graphics::printMultipleLines(const std::string& str, int x, int y, SDL_Color color, SDL_Renderer* renderer,  bool shaded, SDL_Color backgroundColor){
-	int maxWidth = 0,
-	height = 0;
+std::vector<SDL_Surface*> Graphics::createSurfacesFromString(const std::string& str, SDL_Color color, SDL_Renderer* renderer, SDL_Rect* overallRect){
+	int maxWidth = 0;
+	int height = 0;
 	std::string stringOfInterest = str;
 	if(stringOfInterest.back()!='\n')
 		stringOfInterest+="\n";
-	std::cout<<str<<"\n"<<"SDL_Error in printMultipleLines: "<<SDL_GetError()<<std::endl;
 	std::string temporaryString = "";
 	int length = stringOfInterest.length();
-	int reachedHeight = 0;
 	std::vector<SDL_Surface*> textures;
 	for(int i(0); i<length; i++){
 		if(stringOfInterest[i] != '\n'){
@@ -61,13 +59,23 @@ SDL_Rect Graphics::printMultipleLines(const std::string& str, int x, int y, SDL_
 			textures.push_back(surface);
 		}
 	}
-	SDL_Rect rectToFill{x,y,maxWidth,height};
+	if(overallRect){
+		overallRect->x = 0;
+		overallRect->y = 0;
+		overallRect->w = maxWidth;
+		overallRect->h = height;
+	}
+	return textures;
+}
+
+
+SDL_Rect Graphics::printMultipleLines(const std::string& str, int x, int y, SDL_Color color, SDL_Renderer* renderer,  bool shaded, SDL_Color backgroundColor){
+	int reachedHeight = 0;
+	SDL_Rect rectToFill{x,y};
+	std::vector<SDL_Surface*> textures = Graphics::createSurfacesFromString(str, color, renderer, &rectToFill);
 	if(shaded){
-		SDL_Color oldRenderDrawColor;
-		SDL_GetRenderDrawColor(renderer,&(oldRenderDrawColor.r),&(oldRenderDrawColor.g),&(oldRenderDrawColor.b),&(oldRenderDrawColor.a));
-		SDL_SetRenderDrawColor(renderer, backgroundColor);
-		SDL_RenderFillRect(renderer, &rectToFill);
-		SDL_SetRenderDrawColor(renderer, oldRenderDrawColor);
+		if(FillRect(rectToFill, color, renderer) != ErrorCode::OK)
+			throw std::runtime_error("Fail while printing shadedly!");
 	}
 	for(SDL_Surface* currentSurface: textures){
 		SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, currentSurface);
@@ -107,8 +115,17 @@ SDL_Rect Graphics::displayText(const std::string& str, int x, int y, SDL_Color c
 }
 
 SDL_Rect Graphics::printMultipleLines(const std::string& str, int x, int y, SDL_Color color, SDL_Renderer* renderer, SDL_Color backgroundColor){
-	std::cout<<"Text: "<<str<<std::endl;
 	return Graphics::printMultipleLines(str, x, y, color, renderer, true, backgroundColor);
+}
+
+ErrorCode Graphics::FillRect(SDL_Rect rectToFill, SDL_Color color, SDL_Renderer* renderer){
+	ErrorCode error = ErrorCode::OK;
+	SDL_Color oldRenderDrawColor;
+	checkForError(SDL_GetRenderDrawColor(renderer,&(oldRenderDrawColor.r),&(oldRenderDrawColor.g),&(oldRenderDrawColor.b),&(oldRenderDrawColor.a)), error);
+	checkForError(SDL_SetRenderDrawColor(renderer, color), error);
+	checkForError(SDL_RenderFillRect(renderer, &rectToFill), error);
+	checkForError(SDL_SetRenderDrawColor(renderer, oldRenderDrawColor), error);
+	return error;
 }
 
 bool Graphics::isWithinRect(int x, int y, SDL_Rect& rect){

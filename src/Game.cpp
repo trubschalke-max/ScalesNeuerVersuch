@@ -6,7 +6,7 @@
 #include<memory>
 #include "ClassicUnhoverableButtonElement.hpp"
 #include "ScaleElement.hpp"
-#include "EventHandler.hpp"
+#include "BasicGameObjectHandler.hpp"
 
 
 Game::Game()
@@ -41,11 +41,17 @@ void Game::m_init(){
 }
 
 ErrorCode Game::m_simpleTest(){
-    Scale scale("above", "below", Scale::SCALE_1);
-    ScaleElement element = ScaleElement(0, 100, &scale);
+    try{
 
-    Drawing drawing(m_mainWindow->m_Renderer());
-    drawing.m_add(&element);
-    Displayer e(&drawing);
-    return e.m_eventLoop();
+        Scale scale("above", "below", Scale::SCALE_1);
+        ScaleElement element = ScaleElement(0, 100, &scale);
+        
+        Drawing drawing(m_mainWindow->m_Renderer());
+        drawing.m_add(&element);
+        BasicGameObjectHandler e(&drawing);
+        return e.m_eventLoop();
+    }
+    catch(SDLQuitException& e){
+        return e.m_error;
+    }
 }

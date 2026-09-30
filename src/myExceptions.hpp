@@ -4,6 +4,7 @@
 #include <exception>
 #include <stdexcept>
 #include<sstream>
+#include "ErrorCode.hpp"
 
 class NullPointerException: public std::exception{
 public:
@@ -24,8 +25,10 @@ class LittleExceptionToDisplay: public std::runtime_error{
 	using std::runtime_error::runtime_error;
 };
 
-class SDLQuitException: public std::runtime_error{
-	public: SDLQuitException():std::runtime_error("SDL QuitException"){}
+class SDLQuitException: public std::exception{
+public: ErrorCode m_error;
+	SDLQuitException(ErrorCode error = ErrorCode::OK): m_error(error){}
+	const char* what(){std::string s = "SDLQuitException" + toString(m_error); return s.c_str();}
 };
 
 class QuitSurface: public std::runtime_error{

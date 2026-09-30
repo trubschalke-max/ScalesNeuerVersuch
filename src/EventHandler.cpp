@@ -1,5 +1,6 @@
 #include "EventHandler.hpp"
 #include "myExceptions.hpp"
+#include <iostream>
 
 typedef EventHandler::HandlingClass HC;
 
@@ -25,8 +26,8 @@ ErrorCode EventHandler::m_enter(){
 
 ErrorCode EventHandler::m_eventLoop(){
 try{
-    ErrorCode error = ErrorCode::OK;
-    checkForError(m_enter(), error);
+    ErrorCode error = ErrorCode::OK; //I'm not yet sure what is the norm: NOTHING_HAPPENED OR OK. Probably OK due to the entering processes not being likely to return NOTHING_HAPPENED.
+    ErrorHandling::checkForErrorStandardHierarchy(m_enter(), error);
     SDL_Event event;
     bool quit = false;
     while(!quit){
@@ -35,21 +36,23 @@ try{
                 throw SDLQuitException();
             }
             HandlingClass diagnosis = m_classify(event);
-            HandlingResult result = HandlingResult::NO_RESULT_YET;
             switch(diagnosis){
                 case IRRELEVANT: break;
                 case HC_QUIT_SDL: throw SDLQuitException();
-                case HC_QUIT_LOOP: 
-                quit = true; 
+                case HC_QUIT_LOOP: quit = true; 
                 break;
                 default:{
+                     HandlingResult result = HandlingResult::NO_RESULT_YET;
                     result = m_handleRelevantEvent(event, diagnosis);
-                    checkForError(m_handleResult(result), error);
+                    ErrorHandling::checkForErrorStandardHierarchy(m_handleResult(result), error);
                     switch(result){
                         case HandlingResult::QUIT_FROM_SDL: throw SDLQuitException();
                         case HandlingResult::QUIT_LOOP: 
                             quit = true;
-                            default: 
+                        case HandlingResult::FAILURE: 
+                            std::cerr<<"Something went wrong handling an event"<<std::endl;
+                            throw std::runtime_error("Something went wrong handling an event");
+                        default: 
                             break;
                         }
                     }
@@ -59,7 +62,7 @@ try{
         }
         return error;
     }
-    catch(...){
+    catch(SDLQuitException){
         throw;
     }
 }
@@ -73,12 +76,18 @@ try{
             }
             checkForError(m_whatToDraw->m_draw(), error);
             SDL_RenderPresent(m_whatToDraw->m_Renderer());
+            return error;
         default:
-            return ErrorCode::OK;
+            return ErrorCode::OK; 
     }
 }
 
 HC EventHandler::m_classify(const SDL_Event& event){
+    //For testing. 
+    if(event.type == SDL_DISPLAYEVENT || event.type == SDL_WINDOWEVENT || event.type == 4352 //The last one might be something about audio devices being added. Right now, I don't care.
+        || event.type == SDL_MOUSEMOTION //comment this out when neot necessary
+    )
+        return IRRELEVANT;
     return UNSPECIFIED;
 }
 
