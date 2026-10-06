@@ -15,13 +15,17 @@ public:
 protected:
     ColorSet m_colors;
 public:
-    ClassicUnhoverableButtonElement(int x, int y, int width, int height, std::string text, SDL_Color backgroundColorWhenActive, SDL_Color backgroundColorWhenPassive, SDL_Color textColor, GameObject::Layer layer = DEFAULT_LAYER, ButtonElement::Activeness activeness = PASSIVE);
-    ClassicUnhoverableButtonElement(int x, int y, int width, int height, std::string text, ColorSet colors, GameObject::Layer layer = DEFAULT_LAYER, ButtonElement::Activeness activeness = PASSIVE);
-    ClassicUnhoverableButtonElement(SDL_Rect shapeAndPlace, std::string text, ColorSet colors, GameObject::Layer layer = DEFAULT_LAYER, ButtonElement::Activeness activeness = PASSIVE);
+    ClassicUnhoverableButtonElement(int x, int y, int width, int height, std::string text, SDL_Color backgroundColorWhenActive, SDL_Color backgroundColorWhenPassive, SDL_Color textColor, GameObject::Layer layer = DEFAULT_LAYER,ObjectData::Activeness activeness = ObjectData::Activeness::PASSIVE);
+    ClassicUnhoverableButtonElement(int x, int y, int width, int height, std::string text, ColorSet colors, GameObject::Layer layer = DEFAULT_LAYER,ObjectData::Activeness activeness = ObjectData::Activeness::PASSIVE);
+    ClassicUnhoverableButtonElement(SDL_Rect shapeAndPlace, std::string text, ColorSet colors, GameObject::Layer layer = DEFAULT_LAYER,ObjectData::Activeness activeness = ObjectData::Activeness::PASSIVE);
+    ClassicUnhoverableButtonElement(ClassicUnhoverableButtonElement&&) = default;
     
     virtual SDL_Color m_currentBackgroundColor();
     virtual SDL_Color m_currentTextColor();
     virtual ~ClassicUnhoverableButtonElement();
+
+    ObjectData::ScaleValue scaleValue = ObjectData::ScaleValue::DUMMY_VALUE; //Only for testing.
+
 
 };
 

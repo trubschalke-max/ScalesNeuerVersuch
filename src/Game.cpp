@@ -8,6 +8,7 @@
 #include "ScaleElement.hpp"
 #include "BasicGameObjectHandler.hpp"
 
+using ObjectData::ScaleValue;
 
 Game::Game()
 {
@@ -43,8 +44,8 @@ void Game::m_init(){
 ErrorCode Game::m_simpleTest(){
     try{
 
-        Scale scale("above", "below", Scale::SCALE_1);
-        ScaleElement element = ScaleElement(0, 100, &scale);
+        Scale scale("above", "below", ScaleValue::SCALE_1);
+        ScaleElement element(0, 100, &scale);
         
         Drawing drawing(m_mainWindow->m_Renderer());
         drawing.m_add(&element);

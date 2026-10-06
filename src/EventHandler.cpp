@@ -85,7 +85,7 @@ try{
 HC EventHandler::m_classify(const SDL_Event& event){
     //For testing. 
     if(event.type == SDL_DISPLAYEVENT || event.type == SDL_WINDOWEVENT || event.type == 4352 //The last one might be something about audio devices being added. Right now, I don't care.
-        || event.type == SDL_MOUSEMOTION //comment this out when neot necessary
+    //    || event.type == SDL_MOUSEMOTION //comment this out when neot necessary
     )
         return IRRELEVANT;
     return UNSPECIFIED;

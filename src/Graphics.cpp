@@ -132,11 +132,11 @@ bool Graphics::isWithinRect(int x, int y, SDL_Rect& rect){
 	 // Too far left
     if (x < rect.x) return false;
     // Too far right
-    if (x > rect.x + rect.w) return false;
+    if (x >= rect.x + rect.w) return false;
     // Too far up
     if (y < rect.y) return false;
     // Too far down
-    if (y > rect.y + rect.h) return false;
+    if (y >= rect.y + rect.h) return false;
 
 	return true;
 }

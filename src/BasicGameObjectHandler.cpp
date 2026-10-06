@@ -1,4 +1,6 @@
 #include "BasicGameObjectHandler.hpp"
+#include <iostream>
+
 
 BasicGameObjectHandler::BasicGameObjectHandler(Drawing* whatToDraw): EventHandler(whatToDraw)
 {
@@ -25,7 +27,8 @@ EventHandler::HandlingResult BasicGameObjectHandler::m_handleRelevantEvent(const
             return HandlingResult::REDRAW;
         case ErrorCode::NOTHING_HAPPENED: 
             return HandlingResult::GO_ON;
-        default: return HandlingResult::FAILURE;
+        default: std::cout<<"Handling result failure due to error code"<<error<<std::endl;
+        return HandlingResult::FAILURE;
     }
 }
 
