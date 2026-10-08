@@ -12,6 +12,8 @@ public:
         SDL_Color m_backgroundColorWhenHovered;
         SDL_Color m_backgroundColorWhenForbidden;
         SDL_Color m_colorWhenPermanentlyActive;
+        SDL_Color m_colorWhenSecretlyActive;
+        SDL_Color m_colorWhenSecretlyPassive;
     };
 protected: 
     ColorSetExtension m_furtherColors;

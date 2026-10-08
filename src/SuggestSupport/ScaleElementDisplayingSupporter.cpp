@@ -1,4 +1,4 @@
-#include "ScaleElementDisplayingSupporter.hpp"
+#include "SuggestSupport/ScaleElementDisplayingSupporter.hpp"
 #include <algorithm>
 
 ScaleElementDisplayingSupporter::ScaleElementDisplayingSupporter(ScaleElement* element):DisplayingSupporter(element), m_element(element)

@@ -1,0 +1,11 @@
+#include "SuggestSupport/HoverableCompositeButtonElementDisplayingSupporter.hpp"
+
+HoverableCompositeButtonElementDisplayingSupporter::HoverableCompositeButtonElementDisplayingSupporter()
+{
+
+}
+
+HoverableCompositeButtonElementDisplayingSupporter::~HoverableCompositeButtonElementDisplayingSupporter()
+{
+
+}
