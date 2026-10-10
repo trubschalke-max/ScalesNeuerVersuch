@@ -3,8 +3,8 @@
 
 #include<SDL2/SDL.h>
 #include "ErrorCode.hpp"
-#include "Suggestor.hpp"
-#include "DisplayingSupporter.hpp"
+#include "SuggestSupport/Suggestor.hpp"
+#include "SuggestSupport/DisplayingSupporter.hpp"
 
 class GameObject{
 public:

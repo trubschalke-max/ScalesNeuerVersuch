@@ -1,5 +1,5 @@
 #include "HoverableButtonElement.hpp"
-#include "HoverableButtonElementDisplayingSupporter.hpp"
+#include "SuggestSupport/HoverableButtonElementDisplayingSupporter.hpp"
 
 #define ScaleLike HoverableButtonElement
 #define BaseButton ClassicUnhoverableButtonElement

@@ -1,4 +1,4 @@
-#include "ScaleElementSuggestor.hpp"
+#include "SuggestSupport/ScaleElementSuggestor.hpp"
 
 using ObjectData::ScaleData;
 using ObjectData::ScaleValue;
