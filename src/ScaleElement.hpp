@@ -11,13 +11,11 @@
 
 #define FURTHER_SCALE_BUTTONS_COUNT 2
 
-class ScaleElement: public GameObject
+class ScaleElement: public HoverableCompositeButtonElement
 {
 private:
     Scale* m_associatedScale;
-    ErrorCode m_createButtons();
-    std::vector<std::unique_ptr<HoverableButtonElement>> m_buttons;
-    ColorSet m_colors;
+    ErrorCode m_createButtons() override;
     int m_buttonIndexFor(ObjectData::ScaleValue val);
     ObjectData::Activeness m_figureOutActiveness(ObjectData::ScaleValue whatFor);
     ErrorCode m_handleScaleValueSuggestion(ObjectData::ScaleValue selectedValue); //This is a private function which assumes validity, and directs to Scale::m_select(), Scale::m_commit() or Scale::m_undo() as appropriate. It does not refresh the buttons' activeness.

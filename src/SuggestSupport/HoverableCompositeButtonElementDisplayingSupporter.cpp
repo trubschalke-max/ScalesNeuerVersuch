@@ -3,6 +3,9 @@
 #include "HoverableCompositeButtonElement.hpp"
 
 HoverableCompositeButtonElementDisplayingSupporter::HoverableCompositeButtonElementDisplayingSupporter(Comp* el): DisplayingSupporter(el), m_element(el)
+#include "SuggestSupport/HoverableCompositeButtonElementDisplayingSupporter.hpp"
+
+HoverableCompositeButtonElementDisplayingSupporter::HoverableCompositeButtonElementDisplayingSupporter()
 {
 
 }

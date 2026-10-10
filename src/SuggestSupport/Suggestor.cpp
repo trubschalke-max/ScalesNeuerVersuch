@@ -1,4 +1,4 @@
-#include "Suggestor.hpp"
+#include "SuggestSupport/Suggestor.hpp"
 #include <iostream>
 
 Suggestor::Suggestor(GameObject* obj): m_associatedObject(obj)

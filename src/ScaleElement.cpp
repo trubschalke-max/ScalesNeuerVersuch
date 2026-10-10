@@ -10,13 +10,14 @@ using ObjectData::ScaleData;
 using ObjectData::ScaleValue; 
 using ObjectData::State;
 
-ScaleElement::ScaleElement(int x, int y, Scale* scale): GameObject(x,y), m_colors(s_standardColors()), m_associatedScale(scale)
+ScaleElement::ScaleElement(int x, int y, Scale* scale): Comp(x,y), m_associatedScale(scale)
 {
     m_colors = s_standardColors();
     if(m_createButtons() != ErrorCode::OK){
         throw std::runtime_error("Unable to create buttons for scale!");
     }
     m_suggestor = std::make_unique<ScaleElementSuggestor>(this);
+    m_colors = s_standardColors();
 }
 
 ScaleElement::~ScaleElement()
@@ -64,14 +65,6 @@ ScaleElement::ColorSet ScaleElement::s_standardColors(){
     };
 }
 
-bool ScaleElement::m_isHitBy(int x, int y){
-    for(auto& button: m_buttons){
-        if(button->m_isHitBy(x,y)){
-            return true;
-        }
-    }
-    return false;
-}
 /*
 ErrorCode ScaleElement::m_leftClick(int x, int y){//Later on, the scale element will be configured in a way such that they obey the rules of the game.
 bool done = false;
