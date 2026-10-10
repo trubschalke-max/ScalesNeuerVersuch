@@ -1,17 +1,18 @@
-#include "ScaleElementDisplayingSupporter.hpp"
+#include "SuggestSupport/HoverableCompositeButtonElementDisplayingSupporter.hpp"
 #include <algorithm>
+#include "HoverableCompositeButtonElement.hpp"
 
-ScaleElementDisplayingSupporter::ScaleElementDisplayingSupporter(ScaleElement* element):DisplayingSupporter(element), m_element(element)
+HoverableCompositeButtonElementDisplayingSupporter::HoverableCompositeButtonElementDisplayingSupporter(Comp* el): DisplayingSupporter(el), m_element(el)
 {
 
 }
 
-ScaleElementDisplayingSupporter::~ScaleElementDisplayingSupporter()
+HoverableCompositeButtonElementDisplayingSupporter::~HoverableCompositeButtonElementDisplayingSupporter()
 {
 
 }
 
-bool ScaleElementDisplayingSupporter::m_isRelevantForDisplaying(const SDL_Event& event){//This assumes that the buttons do not intersect, and that any event handled by a suggestion machinery will not be included here.
+bool CompSupp::m_isRelevantForDisplaying(const SDL_Event& event){//This assumes that the buttons do not intersect, and that any event handled by a suggestion machinery will not be included here.
     auto& buttons = m_element->m_buttons;
     if(std::find_if(buttons.begin(), buttons.end(), [&event](auto& el){
         return el->m_relevanceOf(event) == GameObject::RELEVANT;
@@ -24,8 +25,8 @@ bool ScaleElementDisplayingSupporter::m_isRelevantForDisplaying(const SDL_Event&
     return false;
 }
 
-ErrorCode ScaleElementDisplayingSupporter::m_changeDisplayingDueTo(const SDL_Event& event){
-    ErrorCode error = ErrorCode::NOTHING_HAPPENED;
+ErrorCode CompSupp::m_changeDisplayingDueTo(const SDL_Event& event){
+    ErrorCode error = ErrorCode::NOTHING_HAPPENED; 
     for(auto& button: m_element->m_buttons){
         if(button->m_relevanceOf(event) == GameObject::RELEVANT_FOR_DISPLAYING){
             ErrorCode rawEC = button->m_changeDisplayingDueTo(event);
@@ -36,4 +37,5 @@ ErrorCode ScaleElementDisplayingSupporter::m_changeDisplayingDueTo(const SDL_Eve
     }
     return error;
 }
+
 

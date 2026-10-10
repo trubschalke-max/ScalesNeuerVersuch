@@ -5,17 +5,15 @@
 
 #include "Scale.hpp"
 #include "HoverableButtonElement.hpp"
+#include "HoverableCompositeButtonElement.hpp"
+#include "SuggestSupport/HoverableButtonElementDisplayingSupporter.hpp"
 #include <vector>
 
 #define FURTHER_SCALE_BUTTONS_COUNT 2
 
 class ScaleElement: public GameObject
 {
-    public: struct ColorSet{
-        ClassicUnhoverableButtonElement::ColorSet basicColors;
-        HoverableButtonElement::ColorSetExtension furtherColors;
-    };
-    private:
+private:
     Scale* m_associatedScale;
     ErrorCode m_createButtons();
     std::vector<std::unique_ptr<HoverableButtonElement>> m_buttons;
@@ -23,15 +21,15 @@ class ScaleElement: public GameObject
     int m_buttonIndexFor(ObjectData::ScaleValue val);
     ObjectData::Activeness m_figureOutActiveness(ObjectData::ScaleValue whatFor);
     ErrorCode m_handleScaleValueSuggestion(ObjectData::ScaleValue selectedValue); //This is a private function which assumes validity, and directs to Scale::m_select(), Scale::m_commit() or Scale::m_undo() as appropriate. It does not refresh the buttons' activeness.
+protected:
+    bool m_showHoveredState() override;
 
-    public:
+public:
     ScaleElement(int x, int y, Scale* scale);
     virtual ~ScaleElement();
 
     
     ObjectData::ScaleValue m_valueAt(int x, int y); //This function recognizes the commit button and the undo button. If the value does not belong to a button, DUMMY_VALUE is being returned.
-    virtual bool m_isHitBy(int x, int y) override;
-    virtual ErrorCode m_draw(SDL_Renderer* renderer) override;
     int m_Width(){return 200;} //Some value for later revisiting
     int m_HeightPerElement(){return 30;} //Some value for later revisiting
     ErrorCode m_refreshButtonsActiveness();

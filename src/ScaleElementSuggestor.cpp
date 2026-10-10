@@ -4,7 +4,7 @@ using ObjectData::ScaleData;
 using ObjectData::ScaleValue;
 using ObjectData::State;
 
-ScaleElementSuggestor::ScaleElementSuggestor(ScaleElement* element): Suggestor(element), m_scaleElement(element)
+ScaleElementSuggestor::ScaleElementSuggestor(ScaleElement* element): HoverableCompositeButtonElementSuggestor(element), m_scaleElement(element)
 {
 
 }
@@ -14,17 +14,6 @@ ScaleElementSuggestor::~ScaleElementSuggestor()
 
 }
 
-bool ScaleElementSuggestor::m_isRelevantForSuggesting(const SDL_Event& event){
-    if(event.type != SDL_MOUSEBUTTONDOWN){
-        return false;
-    }
-    if(!m_scaleElement->m_isHitBy(event.button.x, event.button.y)){
-        return false;
-    }
-    if(event.button.button != SDL_BUTTON_LEFT)
-        return false;
-    return true; //Right now, the scale element does not know if it is allowed to actually alter the scale data. Don't overestimate the meaning of a suggestion.
-}
 
 Suggestor::Suggestion ScaleElementSuggestor::m_suggestForRelevantEvent(const SDL_Event& event){
     Suggestion toSuggest;

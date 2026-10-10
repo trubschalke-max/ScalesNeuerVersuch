@@ -40,7 +40,7 @@ ErrorCode Drawing::m_handleEvent(const SDL_Event& event, ErrorList whatCanIIgnor
         if(rawEC == ErrorCode::NOT_ACTUALLY_CLICKED)
             rawEC = ErrorCode::NOTHING_HAPPENED;
         ErrorHandling::checkForErrorStandardHierarchy(rawEC, error);
-        if(m_acceptsEvents == EvAc::ONE || std::find(whatCanIIgnore.begin(), whatCanIIgnore.end(), rawEC) == whatCanIIgnore.end()){
+        if(m_acceptsEvents == EvAc::ONE && rawEC == ErrorCode::OK || std::find(whatCanIIgnore.begin(), whatCanIIgnore.end(), rawEC) == whatCanIIgnore.end()){ //Return on first error and possibly on the first successful event handling. If nothing happened, we iterate further.
             return error;
         }
     }

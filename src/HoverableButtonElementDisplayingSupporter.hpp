@@ -6,6 +6,7 @@
 
 class HoverableButtonElementDisplayingSupporter: public DisplayingSupporter
 {
+protected: 
 private:
     HoverableButtonElement* m_button;
 public:

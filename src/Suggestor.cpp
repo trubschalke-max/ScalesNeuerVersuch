@@ -11,7 +11,7 @@ Suggestor::~Suggestor()
 
 }
 
-bool Suggestor::Suggestion::m_empty() const{return activeness.get() == nullptr && scaleData.get() == nullptr;}
+bool Suggestor::Suggestion::m_empty() const{return activeness.get() == nullptr && scaleData.get() == nullptr && explainables.get() == nullptr;}
 
 Suggestor::Suggestion Suggestor::m_suggestFor(const SDL_Event& event){
     if(!m_isRelevantForSuggesting(event)){

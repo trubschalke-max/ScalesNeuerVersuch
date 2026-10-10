@@ -15,6 +15,12 @@ std::string toString(ErrorCode code){
         case EC::DRAWING_MUST_NOT_HANDLE_EVENTS: return "DRAWING_MUST_NOT_HANDLE_EVENTS";
         case EC::SCALE_BUTTON_REFRESHING_FAIL: return "SCALE_BUTTON_REFRESHING_FAIL";
         case EC::TOO_BIG_RECT: return "TOO_BIG_RECT";
+        case EC::PUTTING_INTO_EFFECT_NOT_POSSIBLE: return "PUTTING_INTO_EFFECT_NOT_POSSIBLE";
+        case EC::MULTIPLE_CORRECT_VALUES: return "MULTIPLE_CORRECT_VALUES";
+        case EC::MULTIPLE_SUGGESTIONS: return "MULTIPLE_SUGGESTIONS";
+        case EC::NO_CORRECT_VALUE: return "NO_CORRECT_VALUE";
+        case EC::INVALID_WORD_SELECTION: return "INVALID_WORD_SELECTION";
+        case EC::CORRECT_WORD_ALREADY_SELECTED: return "CORRECT_WORD_ALREADY_SELECTED";
         default: std::string tmp = "ERROR_CODE_NUMBER: ";        
         tmp.append(std::to_string((int) code));
         return tmp.c_str();

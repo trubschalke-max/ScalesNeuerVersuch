@@ -1,7 +1,8 @@
 #include "ScaleElement.hpp"
 #include "Graphics.hpp"
-#include "ScaleElementDisplayingSupporter.hpp"
-#include "ScaleElementSuggestor.hpp"
+#include "SuggestSupport/HoverableCompositeButtonElementDisplayingSupporter.hpp"
+#include "SuggestSupport/ScaleElementSuggestor.hpp"
+#include "HoverableCompositeButtonElement.hpp"
 
 typedef HoverableButtonElement ScaleLike;
 using ObjectData::Activeness;
@@ -11,10 +12,10 @@ using ObjectData::State;
 
 ScaleElement::ScaleElement(int x, int y, Scale* scale): GameObject(x,y), m_colors(s_standardColors()), m_associatedScale(scale)
 {
+    m_colors = s_standardColors();
     if(m_createButtons() != ErrorCode::OK){
         throw std::runtime_error("Unable to create buttons for scale!");
     }
-    m_displayingSupporter = std::make_unique<ScaleElementDisplayingSupporter>(this);
     m_suggestor = std::make_unique<ScaleElementSuggestor>(this);
 }
 
@@ -47,7 +48,7 @@ ErrorCode ScaleElement::m_createButtons(){
 }
 
 ScaleElement::ColorSet ScaleElement::s_standardColors(){
-    return ScaleElement::ColorSet{
+    return Comp::ColorSet{
             ClassicUnhoverableButtonElement::ColorSet{
                 Graphics::yellowColor(),
                 Graphics::shieldGreyColor(),
@@ -56,20 +57,11 @@ ScaleElement::ColorSet ScaleElement::s_standardColors(){
         HoverableButtonElement::ColorSetExtension{
             SDL_Color{170, 255, 100},
             SDL_Color{210, 210, 150},
-            SDL_Color{255,255,150},
+            SDL_Color{235,235,190},
+            SDL_Color{255, 150, 225},
+            SDL_Color{150, 150, 255}
         }
     };
-}
-
-ErrorCode ScaleElement::m_draw(SDL_Renderer* renderer){
-    ErrorCode error = ErrorCode::OK;
-    for(auto& button: m_buttons){
-        error = button->m_draw(renderer);
-        if(error != ErrorCode::OK){
-        throw std::runtime_error("Drawing a scale has failed!");
-        }
-    }
-    return error;
 }
 
 bool ScaleElement::m_isHitBy(int x, int y){
@@ -240,4 +232,8 @@ ErrorCode ScaleElement::m_handleScaleValueSuggestion(ObjectData::ScaleValue sele
         return m_associatedScale->m_select(selectedValue);
     }
     throw std::logic_error("Something went wrong in ScaleElement::m_handleScaleValueSuggestion(): The suggestion was to select an invalid scale value");
+}
+
+bool ScaleElement::m_showHoveredState(){
+    return m_associatedScale->m_Data().state != State::COMMITTED;
 }

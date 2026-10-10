@@ -5,6 +5,7 @@
 #include "ObjectData.hpp"
 #include <memory>
 #include "ErrorCode.hpp"
+#include <vector>
 
 class GameObject;
 
@@ -14,6 +15,8 @@ public:
     struct Suggestion{
         std::unique_ptr<ObjectData::Activeness> activeness; //This shall replace std::optionals. Unfortunately, my cpp standard is not as high.
         std::unique_ptr<ObjectData::ScaleData> scaleData;
+        std::unique_ptr<std::vector<ObjectData::Explainable>> explainables;
+        std::unique_ptr<ObjectData::ExplainableSetValue> selectedWordValue;
         bool m_empty() const;
         static Suggestion None(){ return Suggestion{};}
     };

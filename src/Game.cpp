@@ -7,6 +7,8 @@
 #include "ClassicUnhoverableButtonElement.hpp"
 #include "ScaleElement.hpp"
 #include "BasicGameObjectHandler.hpp"
+#include "ExplainableSetElement.hpp"
+#include <numeric>
 
 using ObjectData::ScaleValue;
 
@@ -46,9 +48,18 @@ ErrorCode Game::m_simpleTest(){
 
         Scale scale("above", "below", ScaleValue::SCALE_1);
         ScaleElement element(0, 100, &scale);
-        
+        std::vector<int> words(24);
+        std::iota(words.begin(), words.end(), 0);
+
+        std::vector<std::string> wordStrings;
+        for(int i(0); i < words.size(); ++i){
+            wordStrings.push_back(std::to_string(words[i]));
+        }
+        ExplainableSet explainables(wordStrings, ObjectData::ExplainableSetValue::EXSET_1);
+        ExplainableSetElement exel(500, 500, &explainables);
         Drawing drawing(m_mainWindow->m_Renderer());
         drawing.m_add(&element);
+        drawing.m_add(&exel);
         BasicGameObjectHandler e(&drawing);
         return e.m_eventLoop();
     }

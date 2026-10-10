@@ -3,8 +3,9 @@
 
 #pragma once
 #include "ScaleElement.hpp"
+#include "SuggestSupport/HoverableCompositeButtonElementSuggestor.hpp"
 
-class ScaleElementSuggestor: public Suggestor
+class ScaleElementSuggestor: public HoverableCompositeButtonElementSuggestor
 {
 
 private:
@@ -13,9 +14,7 @@ private:
 public:
     ScaleElementSuggestor(ScaleElement* el);
     virtual ~ScaleElementSuggestor();
-
-    bool m_isRelevantForSuggesting(const SDL_Event& event);
-    Suggestor::Suggestion m_suggestForRelevantEvent(const SDL_Event& event);
+    Suggestor::Suggestion m_suggestForRelevantEvent(const SDL_Event& event) override;
 };
 
 #endif
