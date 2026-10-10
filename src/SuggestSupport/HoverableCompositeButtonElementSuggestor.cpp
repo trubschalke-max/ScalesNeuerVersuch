@@ -1,5 +1,5 @@
-#include "HoverableCompositeButtonElementSuggestor.hpp"
 #include "HoverableCompositeButtonElement.hpp"
+#include "SuggestSupport/HoverableCompositeButtonElementSuggestor.hpp"
 
 HoverableCompositeButtonElementSuggestor::HoverableCompositeButtonElementSuggestor(HoverableCompositeButtonElement* element): Suggestor(element), m_element(element)
 {

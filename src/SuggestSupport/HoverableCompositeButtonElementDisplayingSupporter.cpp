@@ -1,11 +1,8 @@
-#include "SuggestSupport/HoverableCompositeButtonElementDisplayingSupporter.hpp"
 #include <algorithm>
 #include "HoverableCompositeButtonElement.hpp"
-
-HoverableCompositeButtonElementDisplayingSupporter::HoverableCompositeButtonElementDisplayingSupporter(Comp* el): DisplayingSupporter(el), m_element(el)
 #include "SuggestSupport/HoverableCompositeButtonElementDisplayingSupporter.hpp"
 
-HoverableCompositeButtonElementDisplayingSupporter::HoverableCompositeButtonElementDisplayingSupporter()
+HoverableCompositeButtonElementDisplayingSupporter::HoverableCompositeButtonElementDisplayingSupporter(HoverableCompositeButtonElement* el): DisplayingSupporter(el), m_element(el)
 {
 
 }
