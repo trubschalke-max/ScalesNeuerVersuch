@@ -1,8 +1,9 @@
 #include "BasicGameObjectHandler.hpp"
 #include <iostream>
+#include "GameObject.hpp"
+#include <algorithm>
 
-
-BasicGameObjectHandler::BasicGameObjectHandler(Drawing* whatToDraw): EventHandler(whatToDraw)
+BasicGameObjectHandler::BasicGameObjectHandler(DrawingObject* whatToDraw): EventHandler(whatToDraw)
 {
     if(!whatToDraw){
         throw std::runtime_error("null drawing for game object event handler!");
@@ -21,8 +22,7 @@ EventHandler::HandlingResult BasicGameObjectHandler::m_handleRelevantEvent(const
     ErrorCode error = m_whatToDraw->m_handleEvent(event);
     switch(error){
         case ErrorCode::OK:
-            SDL_RenderPresent(m_whatToDraw->m_Renderer());
-            return HandlingResult::REDRAW; //This is provisoric. In the future, observing needs to be made. 
+            return HandlingResult::QUIT_AND_REDRAW;
         case ErrorCode::MERELY_VISUAL_IMPLICATIONS:
             return HandlingResult::REDRAW;
         case ErrorCode::NOTHING_HAPPENED: 
@@ -35,4 +35,14 @@ EventHandler::HandlingResult BasicGameObjectHandler::m_handleRelevantEvent(const
 ErrorCode BasicGameObjectHandler::m_enter(){
     m_whatToDraw->m_setAcceptsEvents(Drawing::EventAcceptance::ONE);
     return BasicEventHandler::m_enter();
+}
+
+EventHandler::HandlingClass BasicGameObjectHandler::m_classify(const SDL_Event& event){
+    if(std::find(GameObject::s_sdlEventTypesRelevantForGameObjects().begin(), GameObject::s_sdlEventTypesRelevantForGameObjects().end(), event.type) != GameObject::s_sdlEventTypesRelevantForGameObjects().end())
+        return UNSPECIFIED;
+    return IRRELEVANT;
+}
+
+const Suggestor::Suggestion*BasicGameObjectHandler::m_retrieveSuggestion(){
+    return m_whatToDraw->m_retrieveSuggestion();
 }

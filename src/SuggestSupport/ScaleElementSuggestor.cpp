@@ -45,5 +45,7 @@ Suggestor::Suggestion ScaleElementSuggestor::m_suggestForSelection(ScaleData old
     if(scale->m_contains(selection)){
         newData.selection = selection;
     }
-    return Suggestion{nullptr, std::make_unique<ObjectData::ScaleData>(newData)};
+    Suggestion whatToReturn;
+    whatToReturn.scaleData = std::make_unique<ObjectData::ScaleData>(newData);
+    return whatToReturn;
 }

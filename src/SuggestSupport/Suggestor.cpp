@@ -1,6 +1,35 @@
 #include "SuggestSupport/Suggestor.hpp"
 #include <iostream>
 
+ErrorCode Suggestor::Suggestion::m_validate() const{
+    int count = 0;
+    if(certainlyKnownError != ErrorCode::OK){
+        return certainlyKnownError;
+    }
+    if(m_empty()){
+        return ErrorCode::EMPTY_SUGGESTION;
+    }
+    if(activeness){
+        count++;
+        if(!buttonElement){
+            return ErrorCode::EMPTY_BUTTON_ELEMENT_INSIDE_THE_SUGGESTION;
+        }
+    }
+    if(scaleData){
+        count++;
+    }
+    if(explainables){
+        count++;
+    }
+    if(selectedWordValue){
+        count++;
+    }
+    if(count > 1){
+        return ErrorCode::MULTIPLE_SUGGESTION_ITEMS_AT_ONCE;
+    }
+    return ErrorCode::OK;
+}
+
 Suggestor::Suggestor(GameObject* obj): m_associatedObject(obj)
 {
 }

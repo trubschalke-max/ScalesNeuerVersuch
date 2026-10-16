@@ -8,17 +8,22 @@
 #include <vector>
 
 class GameObject;
+class ButtonElement;
 
 class Suggestor
 {
 public:
     struct Suggestion{
+        ObjectData::PlayerID playerID = ObjectData::PlayerID::PLAYER_NONE;
         std::unique_ptr<ObjectData::Activeness> activeness; //This shall replace std::optionals. Unfortunately, my cpp standard is not as high.
+        ButtonElement* buttonElement = nullptr;
         std::unique_ptr<ObjectData::ScaleData> scaleData;
         std::unique_ptr<std::vector<ObjectData::Explainable>> explainables;
         std::unique_ptr<ObjectData::ExplainableSetValue> selectedWordValue;
         bool m_empty() const;
         static Suggestion None(){ return Suggestion{};}
+        ErrorCode certainlyKnownError = ErrorCode::OK; 
+        ErrorCode m_validate() const; //Validates the suggestion. Returns an appropriate error code if the suggestion is invalid. It returns certainlyKnownError if that is neither set nor part of ErrorHandling::standardErrorHierarchy().
     };
 private: 
     GameObject* const m_associatedObject;

@@ -3,12 +3,12 @@
 #include <iostream>
 #include <vector>
 
-ButtonElement::ButtonElement(int x, int y, int width, int height, std::string text, GameObject::Layer layer, ObjectData::Activeness activeness): GameObject(x, y, layer), m_width(width), m_height(height), m_textDisplayed(text), m_activeness(activeness)
+ButtonElement::ButtonElement(ObjectData::PlayerID playerID, int x, int y, int width, int height, std::string text, GameObject::Layer layer, ObjectData::Activeness activeness): GameObject(playerID, x, y, layer), m_width(width), m_height(height), m_textDisplayed(text), m_activeness(activeness)
 {
 
 }
 
-ButtonElement::ButtonElement(SDL_Rect shapeAndPlace, std::string text,GameObject::Layer layer, ObjectData::Activeness activeness):ButtonElement(shapeAndPlace.x, shapeAndPlace.y, shapeAndPlace.w, shapeAndPlace.h, text, layer, activeness){}
+ButtonElement::ButtonElement(ObjectData::PlayerID playerID, SDL_Rect shapeAndPlace, std::string text,GameObject::Layer layer, ObjectData::Activeness activeness):ButtonElement(playerID, shapeAndPlace.x, shapeAndPlace.y, shapeAndPlace.w, shapeAndPlace.h, text, layer, activeness){}
 
 ButtonElement::~ButtonElement()
 {

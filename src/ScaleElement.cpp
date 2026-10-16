@@ -10,7 +10,7 @@ using ObjectData::ScaleData;
 using ObjectData::ScaleValue; 
 using ObjectData::State;
 
-ScaleElement::ScaleElement(int x, int y, Scale* scale): Comp(x,y), m_associatedScale(scale)
+ScaleElement::ScaleElement(ObjectData::PlayerID playerID, int x, int y, Scale* scale, Layer layer): Comp(playerID, x,y, layer), m_associatedScale(scale)
 {
     m_colors = s_standardColors();
     if(m_createButtons() != ErrorCode::OK){
@@ -37,7 +37,7 @@ ErrorCode ScaleElement::m_createButtons(){
 
         SDL_Rect rect {m_x, currentY, m_Width(), m_HeightPerElement()};
        ObjectData::Activeness activeness = m_associatedScale->m_Data().selection == (Svalue) i ?Activeness::ACTIVE :Activeness::PASSIVE;
-        m_buttons.emplace_back(std::make_unique<HoverableButtonElement>(rect, currentText, m_colors.basicColors, m_colors.furtherColors, GameObject::DEFAULT_LAYER, activeness));
+        m_buttons.emplace_back(std::make_unique<HoverableButtonElement>(m_playerID, rect, currentText, m_colors.basicColors, m_colors.furtherColors, GameObject::DEFAULT_LAYER, activeness));
         auto& currentButton = m_buttons.back();
         m_buttons.back()->scaleValue = (Svalue)(i);
     }    

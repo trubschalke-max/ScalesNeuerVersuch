@@ -1,7 +1,7 @@
 #include "GameObject.hpp"
 #include <iostream>
 
-GameObject::GameObject(int x, int y, Layer layer): m_x(x), m_y(y), m_layer(layer), m_suggestor(std::make_unique<Suggestor>(this)), m_displayingSupporter(std::make_unique<DisplayingSupporter>(this)){}
+GameObject::GameObject(ObjectData::PlayerID playerID, int x, int y, Layer layer): m_playerID(playerID), m_x(x), m_y(y), m_layer(layer), m_suggestor(std::make_unique<Suggestor>(this)), m_displayingSupporter(std::make_unique<DisplayingSupporter>(this)){}
 GameObject::~GameObject(){std::cout << "GameObject destroyed at (" << m_x << ", " << m_y << ")" << std::endl;}
 
 
@@ -47,7 +47,10 @@ ErrorCode GameObject::m_changeDisplayingDueTo(const SDL_Event& event){
 }
 
 Suggestor::Suggestion GameObject::m_suggestFor(const SDL_Event& event){
-    return m_suggestor->m_suggestFor(event);
+    auto suggestion = m_suggestor->m_suggestFor(event);
+    if(!suggestion.m_empty())
+        suggestion.playerID = m_playerID;
+    return suggestion;
 }
 
 ErrorCode GameObject::m_putIntoEffect(const Suggestor::Suggestion& suggestion){
@@ -62,4 +65,8 @@ ErrorCode GameObject::m_resetSuggestion(){
         return ErrorCode::NOTHING_HAPPENED;
     m_currentSuggestion = Suggestor::Suggestion::None();
     return ErrorCode::OK;
+}
+
+std::initializer_list<int> GameObject::s_sdlEventTypesRelevantForGameObjects(){
+    return {SDL_MOUSEBUTTONDOWN, SDL_MOUSEBUTTONUP, SDL_MOUSEMOTION, SDL_KEYDOWN, SDL_KEYUP};
 }

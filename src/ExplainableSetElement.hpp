@@ -16,7 +16,7 @@ private:
     ErrorCode m_refreshButtonsActiveness(); //This function refreshes the activeness of the buttons based on the current state of the explainables. It is called after a suggestion has been put into effect, and also when the element is created.
     
 public:
-    ExplainableSetElement(int x, int y, ExplainableSet* explainables, bool forExplainingPlayer = false, Layer layer = Layer::DEFAULT_LAYER);
+    ExplainableSetElement(ObjectData::PlayerID playerID, int x, int y, ExplainableSet* explainables, bool forExplainingPlayer = false, Layer layer = Layer::DEFAULT_LAYER);
     ~ExplainableSetElement();
 
     ErrorCode m_createButtons() override;

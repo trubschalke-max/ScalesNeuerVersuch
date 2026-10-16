@@ -23,7 +23,7 @@ protected:
     bool m_showHoveredState() override;
 
 public:
-    ScaleElement(int x, int y, Scale* scale);
+    ScaleElement(ObjectData::PlayerID playerID, int x, int y, Scale* scale, Layer layer = Layer::DEFAULT_LAYER);
     virtual ~ScaleElement();
 
     

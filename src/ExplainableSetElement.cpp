@@ -9,7 +9,7 @@ using ObjectData::Explainable;
 using ObjectData::WordState;
 using ObjectData::Activeness;
 
-ExplainableSetElement::ExplainableSetElement(int x, int y, ExplainableSet* explainables, bool forExplainingPlayer, Layer layer): Comp(x, y, layer), m_explainables(explainables), m_forExplainingPlayer(forExplainingPlayer)
+ExplainableSetElement::ExplainableSetElement(ObjectData::PlayerID playerID, int x, int y, ExplainableSet* explainables, bool forExplainingPlayer, Layer layer): Comp(playerID, x, y, layer), m_explainables(explainables), m_forExplainingPlayer(forExplainingPlayer)
 {
     m_colors = s_standardColors();
   if(m_createButtons() != ErrorCode::OK){
@@ -59,7 +59,7 @@ ErrorCode ExplainableSetElement::m_createButtons(){
         auto& explainable = explainables[i];
         SDL_Rect rect {(i/maxYSteps)*buttonWidth, m_y + (i % maxYSteps) * buttonHeight, buttonWidth, buttonHeight};
         ObjectData::Activeness activeness = m_figureOutActiveness(explainable.state);
-        m_buttons.emplace_back(std::make_unique<HoverableButtonElement>(rect, explainable.word, m_colors.basicColors, m_colors.furtherColors, GameObject::DEFAULT_LAYER, activeness));
+        m_buttons.emplace_back(std::make_unique<HoverableButtonElement>(m_playerID, rect, explainable.word, m_colors.basicColors, m_colors.furtherColors, GameObject::DEFAULT_LAYER, activeness));
     }
     return ErrorCode::OK;
 }

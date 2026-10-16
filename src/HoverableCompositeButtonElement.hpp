@@ -21,7 +21,7 @@ protected:
     virtual bool m_showHoveredState();//This function is intended to be overridden in derived classes, and it will be used to determine whether the hovered state should be displayed or not. The default implementation returns true, indicating that the hovered state should be displayed.
 
 public:
-    HoverableCompositeButtonElement(int x, int y, Layer layer = Layer::DEFAULT_LAYER);
+    HoverableCompositeButtonElement(ObjectData::PlayerID playerID, int x, int y, Layer layer = Layer::DEFAULT_LAYER);
     virtual ~HoverableCompositeButtonElement();
     ErrorCode m_draw(SDL_Renderer* renderer);
     friend class HoverableCompositeButtonElementDisplayingSupporter;

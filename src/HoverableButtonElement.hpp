@@ -20,9 +20,9 @@ protected:
 private:
 
 public:
-    HoverableButtonElement(int x, int y, int width, int height, std::string text, SDL_Color backgroundColorWhenActive, SDL_Color backgroundColorWhenPassive, SDL_Color textColor, ColorSetExtension furtherColors, GameObject::Layer layer = DEFAULT_LAYER, ObjectData::Activeness activeness = ObjectData::Activeness::PASSIVE);
-    HoverableButtonElement(int x, int y, int width, int height, std::string text, ColorSet colors, ColorSetExtension furtherColors, GameObject::Layer layer = DEFAULT_LAYER,ObjectData::Activeness activeness = ObjectData::Activeness::PASSIVE);
-    HoverableButtonElement(SDL_Rect shapeAndPlace, std::string text, ColorSet colors, ColorSetExtension furtherColors, GameObject::Layer layer = DEFAULT_LAYER,ObjectData::Activeness activeness = ObjectData::Activeness::PASSIVE);
+    HoverableButtonElement(ObjectData::PlayerID playerID, int x, int y, int width, int height, std::string text, SDL_Color backgroundColorWhenActive, SDL_Color backgroundColorWhenPassive, SDL_Color textColor, ColorSetExtension furtherColors, GameObject::Layer layer = DEFAULT_LAYER, ObjectData::Activeness activeness = ObjectData::Activeness::PASSIVE);
+    HoverableButtonElement(ObjectData::PlayerID playerID, int x, int y, int width, int height, std::string text, ColorSet colors, ColorSetExtension furtherColors, GameObject::Layer layer = DEFAULT_LAYER,ObjectData::Activeness activeness = ObjectData::Activeness::PASSIVE);
+    HoverableButtonElement(ObjectData::PlayerID playerID, SDL_Rect shapeAndPlace, std::string text, ColorSet colors, ColorSetExtension furtherColors, GameObject::Layer layer = DEFAULT_LAYER,ObjectData::Activeness activeness = ObjectData::Activeness::PASSIVE);
     virtual ~HoverableButtonElement();
     HoverableButtonElement(HoverableButtonElement&&) = default;
     

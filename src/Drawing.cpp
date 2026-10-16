@@ -22,9 +22,11 @@ ErrorCode Drawing::m_add(GameObject* newObject){
 }
 
 ErrorCode Drawing::m_draw(){
-    ErrorCode whatToReturn;
+    ErrorCode whatToReturn = ErrorCode::OK;
+    if(!m_renderer)
+        return ErrorCode::SDL_RENDERER_NULL;
     for(GameObject* objectToDraw: m_queue){
-        whatToReturn = objectToDraw->m_draw(m_renderer);
+        ErrorHandling::checkForErrorStandardHierarchy(objectToDraw->m_draw(m_renderer), whatToReturn);
     }
     return whatToReturn;
 }
@@ -45,4 +47,21 @@ ErrorCode Drawing::m_handleEvent(const SDL_Event& event, ErrorList whatCanIIgnor
         }
     }
     return error;
+}
+
+ErrorCode Drawing::m_renderPresent(){
+    if(!m_renderer)
+        return ErrorCode::SDL_RENDERER_NULL;
+    SDL_RenderPresent(m_renderer);
+    return ErrorCode::OK;
+}
+
+const Suggestor::Suggestion* Drawing::m_retrieveSuggestion(){
+    for(GameObject* object: m_queue){
+        const Suggestor::Suggestion& suggestion = object->m_CurrentSuggestion();
+        if(!suggestion.m_empty()){
+            return &suggestion;
+        }
+    }
+    return nullptr;
 }

@@ -1,6 +1,6 @@
 #include "HoverableCompositeButtonElement.hpp"
 
-HoverableCompositeButtonElement::HoverableCompositeButtonElement(int x, int y, Layer layer): GameObject(x, y, layer)
+HoverableCompositeButtonElement::HoverableCompositeButtonElement(ObjectData::PlayerID playerID, int x, int y, Layer layer): GameObject(playerID, x, y, layer)
 {
     m_displayingSupporter = std::make_unique<HoverableCompositeButtonElementDisplayingSupporter>(this);
 }

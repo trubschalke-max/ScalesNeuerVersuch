@@ -31,6 +31,18 @@ std::string toString(ObjectData::WordState ws){
     return "UNKNOWN_WORDSTATE: "+std::to_string((int)ws);
 }
 
+std::string toString(ObjectData::PlayerID pid){
+    switch(pid){
+        case ObjectData::PlayerID::PLAYER_0: return "PLAYER_0";
+        case ObjectData::PlayerID::PLAYER_1: return "PLAYER_1";
+        case ObjectData::PlayerID::PLAYER_2: return "PLAYER_2";
+        case ObjectData::PlayerID::PLAYER_3: return "PLAYER_3";
+        case ObjectData::PlayerID::PLAYER_4: return "PLAYER_4";
+        case ObjectData::PlayerID::PLAYER_NONE: return "PLAYER_NONE";
+    }
+    return "UNKNOWN_PLAYERID: "+std::to_string((int)pid);
+}
+
 ObjectData::Activeness operator|(ObjectData::Activeness a, ObjectData::Activeness b){
     return static_cast<ObjectData::Activeness>(static_cast<int>(a) | static_cast<int>(b));
 }

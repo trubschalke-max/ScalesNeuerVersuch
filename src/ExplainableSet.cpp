@@ -94,3 +94,10 @@ ErrorCode ExplainableSet::m_guess(ExplainableSetValue value){
         return ErrorCode::SUCCESS;
     }
 }
+
+bool ExplainableSet::m_contains(ExplainableSetValue value){
+    if((int) value < 0 || (int) value >= m_explainables.size()){
+        return false;
+    }
+    return true;
+}

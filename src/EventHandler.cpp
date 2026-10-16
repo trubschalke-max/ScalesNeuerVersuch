@@ -4,9 +4,9 @@
 
 typedef EventHandler::HandlingClass HC;
 
-EventHandler::EventHandler(Drawing* whatToDraw): m_whatToDraw(whatToDraw){}
+EventHandler::EventHandler(DrawingObject* whatToDraw): m_whatToDraw(whatToDraw){}
 EventHandler::~EventHandler(){}
-Displayer::Displayer(Drawing* whatToDraw): EventHandler(whatToDraw){if(!whatToDraw) throw std::runtime_error("Displayer constructed without a drawing");}
+Displayer::Displayer(DrawingObject* whatToDraw): EventHandler(whatToDraw){if(!whatToDraw) throw std::runtime_error("Displayer constructed without a drawing");}
 Displayer::~Displayer(){}
 
 bool EventHandler::m_isQuit(const SDL_Event& event){
@@ -19,7 +19,7 @@ ErrorCode EventHandler::m_enter(){
     ErrorCode whatToReturn = ErrorCode::OK;
     if(m_whatToDraw){
         checkForError(m_whatToDraw->m_draw(), whatToReturn);
-        SDL_RenderPresent(m_whatToDraw->m_Renderer());
+        checkForError(m_whatToDraw->m_renderPresent(), whatToReturn);
     }
     return whatToReturn;
 }
@@ -67,19 +67,16 @@ try{
     }
 }
     
-    ErrorCode EventHandler::m_handleResult(EventHandler::HandlingResult result){
-        ErrorCode error = ErrorCode::OK;
-        switch(result){
-            case HandlingResult::REDRAW:
-            if(!m_whatToDraw){
-                return ErrorCode::NULL_DRAWING_IN_EVENT_HANDLER;
-            }
-            checkForError(m_whatToDraw->m_draw(), error);
-            SDL_RenderPresent(m_whatToDraw->m_Renderer());
-            return error;
-        default:
-            return ErrorCode::OK; 
+ErrorCode EventHandler::m_handleResult(EventHandler::HandlingResult result){
+    ErrorCode error = ErrorCode::OK;
+    if((int) result & (int) HandlingResult::REDRAW){
+        if(!m_whatToDraw){
+            return ErrorCode::NULL_DRAWING_IN_EVENT_HANDLER;
+        }
+        checkForError(m_whatToDraw->m_draw(), error);
+        checkForError(m_whatToDraw->m_renderPresent(), error);
     }
+    return error;
 }
 
 HC EventHandler::m_classify(const SDL_Event& event){

@@ -14,21 +14,21 @@ public:
         IRRELEVANT, UNSPECIFIED, HC_QUIT_SDL, HC_QUIT_LOOP, LEFT_CLICK, RIGHT_CLICK, MOUSE_MOTION, KEYDOWN
     };
     enum class HandlingResult{
-        GO_ON, REDRAW, QUIT_FROM_SDL, QUIT_LOOP, NO_RESULT_YET, FAILURE
+        GO_ON, REDRAW = 1, QUIT_FROM_SDL = 2, QUIT_LOOP = 4, NO_RESULT_YET = 8, FAILURE = 16, QUIT_AND_REDRAW = QUIT_LOOP | REDRAW
     };
     
     protected:
-    Drawing* m_whatToDraw;
+    DrawingObject* m_whatToDraw;
     Uint32 m_delayBetweenIterations = 100;
     
     virtual HandlingResult m_handleRelevantEvent(const SDL_Event& event, HandlingClass diagnosis) = 0;
     virtual HandlingClass m_classify(const SDL_Event& event); //For preprocessing. The default behavior is to mark everything as unspecified.
     virtual bool m_isQuit(const SDL_Event& event); //only to filter the most obvious of quits
-    virtual ErrorCode m_handleResult(HandlingResult hr); //The default behavior is to draw if drawing is not NULL and otherwise do nothing
-    virtual ErrorCode m_enter(); //The default behavior is drawing and SDL_RenderPresent() once
+    virtual ErrorCode m_handleResult(HandlingResult hr); //The default behavior is to draw if drawing is not NULL and the redraw flag is set. Possible error return: NULL_DRAWING_IN_EVENT_HANDLER. 
+    virtual ErrorCode m_enter(); //The default behavior is having the drawing draw and renderPresent once
     
     public:
-    EventHandler(Drawing* whatToDraw);
+    EventHandler(DrawingObject* whatToDraw);
     EventHandler() = delete;
     virtual ~EventHandler();
     
@@ -47,7 +47,7 @@ protected:
     virtual std::string m_classDescription();
     static ErrorCode s_displayText(Window* window); //this shall correspond to the legacy code
 public:
-    Displayer(Drawing* whatToDraw);
+    Displayer(DrawingObject* whatToDraw);
     Displayer() = delete;
     virtual ~Displayer();
 };
