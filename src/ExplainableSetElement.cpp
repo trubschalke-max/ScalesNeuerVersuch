@@ -57,7 +57,7 @@ ErrorCode ExplainableSetElement::m_createButtons(){
     for(int i(0); i < explainables.size(); ++i){
         int maxYSteps = 8; //This should be an enum value or something, heavily related to some standard value of the game logic. For now, it is just a number.
         auto& explainable = explainables[i];
-        SDL_Rect rect {(i/maxYSteps)*buttonWidth, m_y + (i % maxYSteps) * buttonHeight, buttonWidth, buttonHeight};
+        SDL_Rect rect {m_x + (i/maxYSteps)*buttonWidth, m_y + (i % maxYSteps) * buttonHeight, buttonWidth, buttonHeight};
         ObjectData::Activeness activeness = m_figureOutActiveness(explainable.state);
         m_buttons.emplace_back(std::make_unique<HoverableButtonElement>(m_playerID, rect, explainable.word, m_colors.basicColors, m_colors.furtherColors, GameObject::DEFAULT_LAYER, activeness));
     }

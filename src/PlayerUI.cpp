@@ -24,9 +24,10 @@ PlayerUI::~PlayerUI()
 
 SDL_Point PlayerUI::m_figureOutPosition(GameObject* obj, ObjectData::GameObjectType type, bool remember){
     SDL_Point position = {0, 0};
+    ScaleElement* scaleElement;
     switch(type){
         case ObjectData::GameObjectType::SCALE_ELEMENT:
-            ScaleElement* scaleElement = dynamic_cast<ScaleElement*>(obj);
+         scaleElement = dynamic_cast<ScaleElement*>(obj);
             if(!scaleElement)
                 throw std::invalid_argument("Failed to cast GameObject to ScaleElement.");
             position.x = m_nextScaleElementX; // Use the next available X position for scale elements.
@@ -37,7 +38,7 @@ SDL_Point PlayerUI::m_figureOutPosition(GameObject* obj, ObjectData::GameObjectT
         case ObjectData::GameObjectType::EXPLAINABLE_SET_ELEMENT: //I'm assuming there can only be one.
             // Example logic: position explainable set element below
             position.x = 0; 
-            position.y = 500; 
+            position.y = 450; 
             break;
         default:
             throw std::invalid_argument("Unknown or not supported GameObjectType");

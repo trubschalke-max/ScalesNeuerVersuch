@@ -65,3 +65,22 @@ const Suggestor::Suggestion* Drawing::m_retrieveSuggestion(){
     }
     return nullptr;
 }
+
+ErrorCode Drawing::m_remove(GameObject* objectToRemove){
+    if(!objectToRemove)
+        return ErrorCode::NULLPOINTER_EXCEPTION;
+    auto it = std::find(m_queue.begin(), m_queue.end(), objectToRemove);
+    if(it == m_queue.end()){
+        return ErrorCode::OBJECT_NOT_IN_QUEUE;
+    }
+    m_queue.erase(it);
+    return ErrorCode::OK;
+}
+
+ErrorCode Drawing::m_resetSuggestion(){
+    ErrorCode error = ErrorCode::OK;
+    for(GameObject* object: m_queue){
+        ErrorHandling::checkForErrorStandardHierarchy(object->m_resetSuggestion(), error);
+    }
+    return error;
+}

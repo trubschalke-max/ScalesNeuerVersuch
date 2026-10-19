@@ -51,6 +51,7 @@ public:
     ErrorCode m_killRound(); //Kills the current round and moves its data into the round history. Only possible if there is a current round.
     ObjectData::PlayerID m_currentPlayerID(){return (ObjectData::PlayerID)(m_RoundHistory().size() % m_gameData.numberOfPlayers + 1);} //This refers to the current explaining player.
     ErrorCode m_killGame(){std::cout<<"Game killed"<<std::endl; return ErrorCode::OK;} //In a complete implementation, this would handle cleanup and finalization of the game. 
+    ErrorCode m_confirmRoundReadiness(); //Confirms the readiness of the current round.
 
     std::vector<ObjectData::PlayerID> m_playerIDs();
 };

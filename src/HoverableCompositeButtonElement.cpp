@@ -33,3 +33,13 @@ ErrorCode Comp::m_draw(SDL_Renderer* renderer){
 bool Comp::m_showHoveredState(){
     return true;
 }
+
+void Comp::m_setPosition(int x, int y){
+    for(auto& button: m_buttons){
+        int buttonDeltaX = button->m_X() - m_x;//Compute the relative position of the button to the composite element.
+        int buttonDeltaY = button->m_Y() - m_y;
+        button->m_setPosition(x + buttonDeltaX, y + buttonDeltaY); 
+    }
+    m_x = x;
+    m_y = y;
+}

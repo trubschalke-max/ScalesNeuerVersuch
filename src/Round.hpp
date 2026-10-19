@@ -47,6 +47,7 @@ private:
     ErrorCode m_createRoundElementRecipesForPlayer(PlayerID player, std::vector<Recipe>& recipes);
     ErrorCode m_addScaleElementRecipeForPlayer(PlayerID player, Scale* scale, std::vector<Recipe>& recipes);
     ErrorCode m_addExplainableSetElementRecipeForPlayer(PlayerID player, ExplainableSet* explainableSet, std::vector<Recipe>& recipes);
+    ErrorCode m_sanityCheck(); //Performs a basic sanity check on the round's data.
 
 public:
     Round(PlayerID explainingPlayer, const std::vector<PlayerID>& players, unsigned short int scalesCount, unsigned short int explainablesCount, unsigned short int scaleMaxValue = (int) ScaleValue::SCALE_CANONICAL_END); //The scaleSize parameter 
@@ -56,6 +57,8 @@ public:
     ErrorCode m_validate(const Suggestor::Suggestion&); //If the suggestion is valid, returns ErrorCode::OK, if it means nothing, it returns ErrorCode::IGNORE_THIS, otherwise returns an appropriate error code.
     ErrorCode m_handleValidSuggestion(const Suggestor::Suggestion&){std::cout<<"Handling valid suggestion"<<std::endl; return ErrorCode::OK;} //I'll have to commit some time. Thus, a placeholder implementation has to do it. The function assumes validity.
     bool m_isRoundFinished(){return false;} // I guess that this will return true on the correct explainable being selected. Right now, it will always return false.
+    ErrorCode m_confirmReadiness(); //This function confirms the readiness of all scales and explainable sets associated with the round - in theory. In practice, I will merely set the readiness flags of the scales to true.
+
     friend class Game; //The game needs to std::move RoundData into the round history.
 
 };

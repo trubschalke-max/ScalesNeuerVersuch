@@ -1,9 +1,0 @@
-- Player?
-- multiple event handlers?
--> make player object managing 
-game with data structure and logic handler,
-the game is not responsible for handling events!
-event loops being run and they end on a suggestion being given
-so a game loop by a gamemain
-suggestions: they always come with a player id (enum value)
-game as a blackbox: take a

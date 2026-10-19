@@ -27,6 +27,8 @@ private:
     ObjectData::ScaleValue m_scaleValueForCommitting(){return (ObjectData::ScaleValue) ((int) m_data.minValue - 1);}
     ObjectData::ScaleValue m_scaleValueForUndoing(){return (ObjectData::ScaleValue) ((int) m_data.minValue - 2);}
     bool m_contains(ObjectData::ScaleValue sv); //Returns true on any value between the minimum and maximum of the regular scale values (excluding further buttons)
+
+    ErrorCode m_setState(ObjectData::State newState); //Sets the state of the scale.
 };
 
 typedef ObjectData::ScaleValue Svalue;

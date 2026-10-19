@@ -1,0 +1,13 @@
+- Player?
+- multiple event handlers?
+-> make player object managing 
+game with data structure and logic handler,
+the game is not responsible for handling events!
+event loops being run and they end on a suggestion being given
+so a game loop by a gamemain
+suggestions: they always come with a player id (enum value)
+
+The suggesting-retrieving engine works
+I did not try to apply the suggestions if they are valid
+The coloring of button elements is questionable and everything is sluggish. I don't know why.
+Challenge for handling suggestions: Multiple scale elements/explainablesetelements need to apply a suggestion to their buttons, but only once to the scale/explainableset.

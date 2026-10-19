@@ -25,7 +25,7 @@ private:
 	unsigned int m_width;
 	unsigned int m_height;
 	public:
-	enum Lengths{SCREEN_WIDTH = 1200, SCREEN_HEIGHT = 900};
+	enum Lengths{SCREEN_WIDTH = 1200, SCREEN_HEIGHT = 780};	
 	~Window();
 	Window(std::string name, unsigned int width = SCREEN_WIDTH, unsigned int height = SCREEN_HEIGHT);
 	unsigned int m_Height();

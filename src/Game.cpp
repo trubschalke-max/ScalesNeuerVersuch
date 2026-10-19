@@ -79,12 +79,14 @@ ErrorCode Game::m_simpleTest(){
         checkForError(m_initializeRound(), m_gameData.error);
         std::map<PlayerID, std::vector<GameObjectFactory::Recipe>> recipeContainer;
         checkForError(m_currentRound->m_createRoundElementRecipes(recipeContainer), m_gameData.error);
-        for(auto& [playerID, recipes] : recipeContainer){
-            for(auto& recipe : recipes){
-                auto player = m_players.at(playerID);
+        for(auto& pair : recipeContainer){
+            for(auto& recipe : pair.second){
+                auto player = m_players.at(pair.first);
                 checkForError(player->m_addRecipe(&recipe), m_gameData.error);
+                //Confirm readiness of scales and explainable sets associated with the recipe.
             }
         }
+        checkForError(m_currentRound->m_confirmReadiness(), m_gameData.error);
         checkForError(m_playRound(), m_gameData.error);
         if(m_gameData.error != ErrorCode::OK){
             std::cout<<"Play round fail: "<<toString(m_gameData.error)<<std::endl;
@@ -115,6 +117,11 @@ ErrorCode Game::m_playRound(){
     if(!m_eventHandler)
         return ErrorCode::EVENT_HANDLER_NULL;
      while(finished == CONTINUE){
+        //Reset the current suggestion before entering the event loop.
+        ErrorCode resetError = m_eventHandler->m_resetSuggestion();
+        if(resetError != ErrorCode::OK && resetError != ErrorCode::NOTHING_HAPPENED){// I'm not sure if, other than for the first iteration, NOTHING_HAPPENED should occur though.
+            checkForErrorStandardHierarchy(resetError, error);
+        }
         checkForErrorStandardHierarchy(m_eventHandler->m_eventLoop(), error);
         auto sugg = m_eventHandler->m_retrieveSuggestion();
         if(!sugg){//No suggestion made. This shouldn't normally happen though, because why would the event loop have been exited then?
@@ -176,14 +183,14 @@ ErrorCode Game::m_initPlayers(){
         return ErrorCode::PLAYERS_ALREADY_INITIALIZED;
     }
     ErrorCode error = ErrorCode::OK;
-    for(int i = 0; i < m_gameData.numberOfPlayers; ++i){//Create one player at a time
+    for(int i = 1; i <= m_gameData.numberOfPlayers; ++i){//Create one player at a time
         checkForError(m_initPlayer(i), error);
     }
     return error;
 }
 
 ErrorCode Game::m_initPlayer(int index){//Note that a player (at least for now) does not get any permanent game objects. Game objects come with the rounds.
-    if(index < 0 || index >= m_gameData.numberOfPlayers){
+    if(index <= 0 || index > m_gameData.numberOfPlayers){
         return ErrorCode::INVALID_PLAYER_INDEX;
     }
     auto player = std::make_unique<Player>(static_cast<PlayerID> (index), m_figureOutPlayerName(static_cast<ObjectData::PlayerID>(index))); 
@@ -225,4 +232,13 @@ ErrorCode Game::m_interpretValidationError(ErrorCode error){
         default:
             return error;
     }
+}
+
+ErrorCode Game::m_confirmRoundReadiness(){
+    if(!m_currentRound){
+        return ErrorCode::NO_CURRENT_ROUND;
+    }
+    ErrorCode error = m_currentRound->m_confirmReadiness();
+    checkForError(error, m_gameData.error);
+    return error;
 }

@@ -26,6 +26,10 @@ Suggestor::Suggestion ScaleElementSuggestor::m_suggestForRelevantEvent(const SDL
     if(event.button.button != SDL_BUTTON_LEFT){
         return toSuggest;
     }
+    if(m_scaleElement->m_associatedScale == nullptr)
+        throw std::logic_error("Weird error: A ScaleElementSuggestor suggests something for a scale element with no associated scale");
+    if(m_scaleElement->m_associatedScale->m_Data().state == State::NOT_READY)
+        throw std::logic_error("Weird error: A ScaleElementSuggestor suggests something for a scale element that is not ready");
     if(m_scaleElement->m_associatedScale->m_Data().state != State::NOT_YET_COMMITTED)
         return toSuggest;
     ScaleData data = m_scaleElement->m_associatedScale->m_Data();

@@ -40,7 +40,7 @@ Suggestor::~Suggestor()
 
 }
 
-bool Suggestor::Suggestion::m_empty() const{return activeness.get() == nullptr && scaleData.get() == nullptr && explainables.get() == nullptr;}
+bool Suggestor::Suggestion::m_empty() const{return activeness.get() == nullptr && scaleData.get() == nullptr && explainables.get() == nullptr && selectedWordValue.get() == nullptr && buttonElement == nullptr && certainlyKnownError == ErrorCode::OK;}
 
 Suggestor::Suggestion Suggestor::m_suggestFor(const SDL_Event& event){
     if(!m_isRelevantForSuggesting(event)){
@@ -57,5 +57,9 @@ Suggestor::Suggestion Suggestor::m_suggestForRelevantEvent(const SDL_Event& even
     Suggestion sug;
     sug.activeness.reset(nullptr);
     sug.scaleData.reset(nullptr);
+    sug.explainables.reset(nullptr);
+    sug.selectedWordValue.reset(nullptr);
+    sug.buttonElement = nullptr;
+    sug.certainlyKnownError = ErrorCode::OK;
     return sug;
 }

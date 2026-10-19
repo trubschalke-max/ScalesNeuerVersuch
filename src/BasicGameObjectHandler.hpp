@@ -20,6 +20,7 @@ public:
     virtual ~BasicGameObjectHandler(); 
     const Suggestor::Suggestion*m_retrieveSuggestion(); //Retrieves the suggestion made by the game objects. The suggestion needs to be unique. 
     bool m_ExpectsSuggestion() const { return m_expectsSuggestion; }
+    ErrorCode m_resetSuggestion(); //The main values are OK if there was one; and NOTHING_HAPPENED if there was none.
 };
 
 #endif

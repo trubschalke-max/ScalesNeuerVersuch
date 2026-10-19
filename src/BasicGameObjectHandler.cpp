@@ -46,3 +46,7 @@ EventHandler::HandlingClass BasicGameObjectHandler::m_classify(const SDL_Event& 
 const Suggestor::Suggestion*BasicGameObjectHandler::m_retrieveSuggestion(){
     return m_whatToDraw->m_retrieveSuggestion();
 }
+
+ErrorCode BasicGameObjectHandler::m_resetSuggestion(){
+    return m_whatToDraw->m_resetSuggestion();
+}

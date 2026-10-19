@@ -45,23 +45,25 @@ try{
                      HandlingResult result = HandlingResult::NO_RESULT_YET;
                     result = m_handleRelevantEvent(event, diagnosis);
                     ErrorHandling::checkForErrorStandardHierarchy(m_handleResult(result), error);
-                    switch(result){
-                        case HandlingResult::QUIT_FROM_SDL: throw SDLQuitException();
-                        case HandlingResult::QUIT_LOOP: 
-                            quit = true;
-                        case HandlingResult::FAILURE: 
-                            std::cerr<<"Something went wrong handling an event"<<std::endl;
-                            throw std::runtime_error("Something went wrong handling an event");
-                        default: 
-                            break;
-                        }
+                    if((result & HandlingResult::FAILURE) != HandlingResult::VOID){
+                        std::cerr<<"Something went wrong handling an event"<<std::endl;
+                        throw std::runtime_error("Something went wrong handling an event");
+                    }
+                    if((result & HandlingResult::QUIT_FROM_SDL) != HandlingResult::VOID){
+                        throw SDLQuitException();
+                    }
+                    if((result & HandlingResult::QUIT_LOOP) != HandlingResult::VOID){
+                        quit = true;
                     }
                 }
             }
-            SDL_Delay(m_delayBetweenIterations); //This reduces energy consumption
+            if(!quit){
+                SDL_Delay(m_delayBetweenIterations); //This reduces energy consumption
+            }
         }
         return error;
     }
+}
     catch(SDLQuitException){
         throw;
     }

@@ -18,7 +18,7 @@ public:
         bool isForExplainingPlayer;
         ClassicUnhoverableButtonElement::ColorSet colors;
         HoverableButtonElement::ColorSetExtension furtherColors;
-        SDL_Rect shapeAndPlace;
+        SDL_Rect shapeAndPlace{GameObject::POSITION_UNDEFINED, GameObject::POSITION_UNDEFINED, 0, 0};
         ObjectData::PlayerID playerID = ObjectData::PlayerID::PLAYER_NONE;
         std::string text = "";
         GameObject::Layer layer = GameObject::DEFAULT_LAYER;

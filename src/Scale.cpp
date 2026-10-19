@@ -96,3 +96,17 @@ std::string toString(ObjectData::ScaleValue val){
     }
     std::string str = "SCALE_" + std::to_string((int) val);
 }
+
+ErrorCode Scale::m_setState(ObjectData::State newState){
+    if(newState != ObjectData::State::NOT_READY && newState != ObjectData::State::ERROR && newState != ObjectData::State::COMMITTED && newState != ObjectData::State::NOT_YET_COMMITTED){
+        return ErrorCode::INVALID_STATE;
+    }
+    if(m_data.state == ObjectData::State::ERROR){
+        return ErrorCode::FAILURE;
+    }
+    if(m_data.state == ObjectData::State::COMMITTED){
+        return ErrorCode::ALREADY_COMMITTED;
+    }
+    m_data.state = newState;
+    return ErrorCode::OK;
+}

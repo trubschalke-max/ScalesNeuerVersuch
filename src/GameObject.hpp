@@ -11,13 +11,14 @@ public:
     enum Layer{DEFAULT_LAYER = 0};
     enum HandlingMode{DO_NOTHING, DISPLAY_ONLY, SUGGEST, DIRECT_HANDLING};
     enum Relevance{IRRELEVANT, RELEVANT_FOR_DISPLAYING, RELEVANT = DIRECT_HANDLING};
+    enum{POSITION_UNDEFINED = -2000};
 protected: 
-    int m_x;
-    int m_y;
+    int m_x = POSITION_UNDEFINED;
+    int m_y = POSITION_UNDEFINED;
     Layer m_layer;
     std::unique_ptr<Suggestor> m_suggestor;
     std::unique_ptr<DisplayingSupporter> m_displayingSupporter;
-    HandlingMode m_mode = DIRECT_HANDLING;
+    HandlingMode m_mode = SUGGEST;
     Suggestor::Suggestion m_currentSuggestion;
     ObjectData::PlayerID m_playerID = ObjectData::PlayerID::PLAYER_NONE;
 public:
@@ -36,7 +37,7 @@ public:
     virtual ErrorCode m_putIntoEffect(const Suggestor::Suggestion& suggestion); //The default behavior is to throw an exception because this should not have been called in the default case.
     virtual ErrorCode m_resetSuggestion();
     const Suggestor::Suggestion& m_CurrentSuggestion(){return m_currentSuggestion;}
-    void m_setPosition(int x, int y){m_x = x; m_y = y;} //When created by the factory, the initial position is not yet clear. Thus, a setter is needed.
+    virtual void m_setPosition(int x, int y){m_x = x; m_y = y;} //When created by the factory, the initial position is not yet clear. Thus, a setter is needed. The virtuality comes from the fact that certain objects consist of many subobjects.
 
     static std::initializer_list<int> s_sdlEventTypesRelevantForGameObjects();
 

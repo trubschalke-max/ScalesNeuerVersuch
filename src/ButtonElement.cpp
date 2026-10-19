@@ -2,6 +2,7 @@
 #include "Graphics.hpp"
 #include <iostream>
 #include <vector>
+#include "Window.hpp"
 
 ButtonElement::ButtonElement(ObjectData::PlayerID playerID, int x, int y, int width, int height, std::string text, GameObject::Layer layer, ObjectData::Activeness activeness): GameObject(playerID, x, y, layer), m_width(width), m_height(height), m_textDisplayed(text), m_activeness(activeness)
 {
@@ -16,6 +17,10 @@ ButtonElement::~ButtonElement()
 }
 
 ErrorCode ButtonElement::m_draw(SDL_Renderer* renderer){//Better redo this. In particular, make sure the sdl rect has the right size.
+    if(m_width <= 0 || m_height <= 0)
+        return ErrorCode::INVALID_RECT;
+    if(m_x + m_width <= 0 || m_y + m_height <= 0 || m_x >= Window::SCREEN_WIDTH || m_y >= Window::SCREEN_HEIGHT)
+        return ErrorCode::OUT_OF_BOUNDS; //This would not always be bad, but if it is not meant to possibly happen, then it should be caught.
     ErrorCode error = ErrorCode::OK;
     SDL_Rect rectOfSurfaces;
     std::vector<SDL_Surface*> textSurfaces = Graphics::createSurfacesFromString(m_textDisplayed, m_currentTextColor(), renderer, &rectOfSurfaces);    

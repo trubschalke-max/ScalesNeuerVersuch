@@ -26,6 +26,7 @@ public:
     ErrorCode m_draw(SDL_Renderer* renderer);
     friend class HoverableCompositeButtonElementDisplayingSupporter;
     virtual bool m_isHitBy(int x, int y) override;
+    void m_setPosition(int x, int y) override; //Sets the position of the composite button element and updates the positions of its sub-buttons.
 
 };
 

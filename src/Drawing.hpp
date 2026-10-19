@@ -30,6 +30,7 @@ public:
     void m_setRenderer(SDL_Renderer* renderer){m_renderer = renderer;}
     void m_setAcceptsEvents(EventAcceptance ea){m_acceptsEvents = ea;}
     const Suggestor::Suggestion*m_retrieveSuggestion() override; //In case there was no nonempty suggestion, nullptr is returned.
+    ErrorCode m_resetSuggestion() override; //The main values are OK if there was one; and NOTHING_HAPPENED if there was none.
 };
 
 #endif // DRAWING_HPP

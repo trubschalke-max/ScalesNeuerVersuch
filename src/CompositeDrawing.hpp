@@ -25,6 +25,7 @@ public:
     ErrorCode m_renderPresent() override;
     virtual void m_setAcceptsEvents(EventAcceptance ea) override; //In the composite drawing, all contained objects should have their event acceptance set accordingly.
     const Suggestor::Suggestion*m_retrieveSuggestion() override;
+    ErrorCode m_resetSuggestion() override; //The main values are OK if there was one; and NOTHING_HAPPENED if there was none.
 };
 
 

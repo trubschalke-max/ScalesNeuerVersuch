@@ -32,7 +32,7 @@ ErrorCode CompositeDrawing::m_draw(std::vector<int>& playerIDs){
 ErrorCode CompositeDrawing::m_draw(){
     ErrorCode error = ErrorCode::OK;
     std::vector<int> playerIDs;
-    for (const auto& pair : m_drawings) {
+    for (const auto& pair : m_drawings) {//Somehow, playerID 0 wasnt found
         playerIDs.push_back(pair.first);
     }
     checkForErrorStandardHierarchy(m_draw(playerIDs), error);
@@ -73,6 +73,11 @@ try{
         if(windowID == -1){
             throw std::logic_error("Unsupported SDL event supposed to be handled by CompositeDrawing.");
         }
+        // Check if the event belongs to this window before passing it to the child drawing. (I forgot this!!!)
+        SDL_Window* window = SDL_RenderGetWindow(pair.second->m_Renderer());    
+        if(SDL_GetWindowID(window) != windowID){
+            continue;
+        }
         ErrorCode childError = pair.second->m_handleEvent(event, whatCanIIgnore);
         if(childError == ErrorCode::DRAWING_MUST_NOT_HANDLE_EVENTS){
             return ErrorCode::DRAWING_MUST_NOT_HANDLE_EVENTS;
@@ -107,4 +112,12 @@ const Suggestor::Suggestion*CompositeDrawing::m_retrieveSuggestion(){
         }
     }
     return nullptr;
+}
+
+ErrorCode CompositeDrawing::m_resetSuggestion(){
+    ErrorCode error = ErrorCode::OK;
+    for(auto& pair : m_drawings){
+        checkForErrorStandardHierarchy(pair.second->m_resetSuggestion(), error);
+    }
+    return error;
 }

@@ -19,6 +19,7 @@ public:
     virtual ErrorCode m_renderPresent() = 0; //This should call SDL_RenderPresent on the associated renderer(s).
     virtual void m_setAcceptsEvents(EventAcceptance ea) = 0; //In the composite drawing, all contained objects should have their event acceptance set accordingly.
     virtual const Suggestor::Suggestion*m_retrieveSuggestion() = 0;
+    virtual ErrorCode m_resetSuggestion() = 0; //The main values are OK if there was one; and NOTHING_HAPPENED if there was none.
 
 };
 

@@ -14,6 +14,7 @@ Round::Round(PlayerID explainingPlayer, const std::vector<PlayerID>& players, un
 {
     m_roundData.explainingPlayer = explainingPlayer;
     m_roundData.players = players;
+    m_roundData.guessingPlayer = m_firstGuessingPlayer();
 }
 
 Round::~Round()
@@ -67,13 +68,15 @@ unsigned short int Round::m_generateCorrectExplainableValue(){
 ErrorCode Round::m_validate(const Suggestor::Suggestion& suggestion){
     //This is not all. But I will implement the short version: Scale selections from the explaining player, word selections from the other players. The first check will be if the suggestion is not trivially invalid, i.e. its own validate method returns an error.
     ErrorCode error = ErrorCode::OK;
+    checkForError(m_sanityCheck(), error);
+
     checkForError(suggestion.m_validate(), error);
     if(suggestion.playerID != PlayerID::PLAYER_NONE && std::find(m_roundData.players.begin(), m_roundData.players.end(), suggestion.playerID) == m_roundData.players.end()){
         return ErrorCode::INVALID_PLAYER_ID;
     }
 
     if(suggestion.scaleData){
-        if(std::find_if(m_roundData.scales.begin(), m_roundData.scales.end(), [&suggestion](const std::unique_ptr<Scale>& sd){ return sd->m_Data().coincidesWith(*suggestion.scaleData, false); }) != m_roundData.scales.end()){//The scale data must belong to a scale that actually exists
+        if(std::find_if(m_roundData.scales.begin(), m_roundData.scales.end(), [&suggestion](const std::unique_ptr<Scale>& sd){ return sd->m_Data().coincidesWith(*suggestion.scaleData, false); }) == m_roundData.scales.end()){//The scale data must belong to a scale that actually exists
             return ErrorCode::WEIRD_SCALE_DATA; //This is a little oversimplified.
         }
         if(suggestion.scaleData->state == ObjectData::State::COMMITTED){
@@ -100,7 +103,7 @@ ErrorCode Round::m_validate(const Suggestor::Suggestion& suggestion){
     return ErrorCode::OK;
 }
 
-ErrorCode Round::m_updateGuessingPlayer(){
+ErrorCode Round::m_updateGuessingPlayer(){// Updates the guessing player to the next one in line, skipping the explaining player. Until now, this is too complicated of a game logic. It shall later be triggered after a guess that successfully misses the correct word.
     if(!m_shallUpdateGuessingPlayer()){
         return ErrorCode::SHOULD_NOT_UPDATE_GUESSING_PLAYER;
     }
@@ -143,7 +146,7 @@ Round::PlayerID Round::m_firstPlayerAfter(PlayerID player, PlayerID excludingPla
 
 bool Round::RoundData::m_areAllScalesCommitted() const{
     for(const auto& scale : scales){
-        if(!(scale->m_Data().state != ObjectData::State::COMMITTED)){
+        if((scale->m_Data().state != ObjectData::State::COMMITTED)){
             return false;
         }
     }
@@ -196,5 +199,37 @@ ErrorCode Round::m_addExplainableSetElementRecipeForPlayer(PlayerID player, Expl
     recipe.type = GameObjectType::EXPLAINABLE_SET_ELEMENT;
     recipe.exSet = explainableSet;
     recipes.push_back(std::move(recipe));
+    return ErrorCode::OK;
+}
+
+ErrorCode Round::m_confirmReadiness(){
+    for(auto& scale : m_roundData.scales){
+        scale->m_setState(ObjectData::State::NOT_YET_COMMITTED);
+    }
+    if(!m_roundData.explainableSet){
+        return ErrorCode::NO_EXPLAINABLE_SET;
+    }
+    return ErrorCode::OK;
+}
+
+ErrorCode Round::m_sanityCheck(){
+    if(m_roundData.players.empty()){
+        return ErrorCode::NO_PLAYERS_AVAILABLE;
+    }
+    if(!m_roundData.explainableSet){
+        return ErrorCode::NO_EXPLAINABLE_SET;
+    }
+    if(m_roundData.scales.empty()){
+        return ErrorCode::NO_SCALES_AVAILABLE;
+    }
+    if(m_roundData.explainingPlayer == PlayerID::DUMMY_PLAYER){
+        return ErrorCode::NO_EXPLAINING_PLAYER;
+    }
+    if(m_roundData.guessingPlayer == PlayerID::DUMMY_PLAYER){
+        return ErrorCode::NO_GUESSING_PLAYER;
+    }
+    if(m_roundData.explainingPlayer == m_roundData.guessingPlayer){
+        return ErrorCode::EXPLAINING_AND_GUESSING_PLAYER_COINCIDE;
+    }
     return ErrorCode::OK;
 }

@@ -14,7 +14,7 @@ public:
         IRRELEVANT, UNSPECIFIED, HC_QUIT_SDL, HC_QUIT_LOOP, LEFT_CLICK, RIGHT_CLICK, MOUSE_MOTION, KEYDOWN
     };
     enum class HandlingResult{
-        GO_ON, REDRAW = 1, QUIT_FROM_SDL = 2, QUIT_LOOP = 4, NO_RESULT_YET = 8, FAILURE = 16, QUIT_AND_REDRAW = QUIT_LOOP | REDRAW
+        VOID = 0, GO_ON = 32, REDRAW = 1, QUIT_FROM_SDL = 2, QUIT_LOOP = 4, NO_RESULT_YET = 8, FAILURE = 16, QUIT_AND_REDRAW = QUIT_LOOP | REDRAW
     };
     
     protected:
@@ -63,6 +63,11 @@ public:
     const char* what(){std::string whatToReturn; whatToReturn = "Invalid handling Class: "+eh->m_classDescription()+" for "+toString(hc); return whatToReturn.c_str();}
 };
 
-
+inline EventHandler::HandlingResult operator&(EventHandler::HandlingResult lhs, EventHandler::HandlingResult rhs){
+    return static_cast<EventHandler::HandlingResult>(static_cast<int>(lhs) & static_cast<int>(rhs));
+}
+inline EventHandler::HandlingResult operator|(EventHandler::HandlingResult lhs, EventHandler::HandlingResult rhs){
+    return static_cast<EventHandler::HandlingResult>(static_cast<int>(lhs) | static_cast<int>(rhs));
+}
 
 #endif
