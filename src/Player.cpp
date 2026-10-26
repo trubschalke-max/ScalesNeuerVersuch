@@ -48,3 +48,26 @@ ErrorCode Player::m_addRecipe(Recipe* recipe){
     checkForError(m_addObject(obj), error); // Add the created object to the player UI and associated drawing.
     return error;
 }
+
+ErrorCode Player::m_removeGameObjects(GameObject::Longevity longevity){
+    for(auto it = m_associatedObjects.begin(); it != m_associatedObjects.end(); ){
+        if((*it)->m_Longevity() == longevity){
+            m_Drawing()->m_remove(it->get());
+            it = m_associatedObjects.erase(it);
+        }
+        else{
+            ++it;
+        }
+    }
+    return ErrorCode::OK;
+}
+
+void Player::m_resetRoundBasedShiftsInUI(){
+    if(m_playerUI)
+        m_playerUI->m_resetRoundBasedShifts();
+}
+
+ErrorCode Player::m_prepareForNewRound(){
+    m_resetRoundBasedShiftsInUI();
+    return ErrorCode::OK;
+}

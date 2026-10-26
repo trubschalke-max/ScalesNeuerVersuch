@@ -84,3 +84,62 @@ ErrorCode Drawing::m_resetSuggestion(){
     }
     return error;
 }
+
+ErrorCode Drawing::m_handleValidSuggestion(const Suggestor::Suggestion& suggestion){
+    bool redraw = false;
+    ErrorCode error = ErrorCode::NOTHING_HAPPENED;
+    int okCounter = 0;
+    for(GameObject* object: m_queue){
+        ErrorCode rawEC;
+        switch(object->m_HandlingMode()){
+            case GameObject::HandlingMode::SUGGEST:
+                if(object->m_isRelevant(suggestion))
+                    rawEC = object->m_putIntoEffect(suggestion);
+                else rawEC = ErrorCode::NOTHING_HAPPENED;
+                break;
+            case GameObject::HandlingMode::DISPLAY_ONLY:
+                rawEC = object->m_updateDisplaying();
+                if(rawEC == ErrorCode::MERELY_VISUAL_IMPLICATIONS || rawEC == ErrorCode::NOTHING_HAPPENED){
+                    rawEC = ErrorCode::NOTHING_HAPPENED;
+                    redraw = true;
+                }
+                break;
+            case GameObject::HandlingMode::DIRECT_HANDLING: //I'm not sure yet what to do then. It should rather not happen.
+                throw std::logic_error("DIRECT_HANDLING mode should not be encountered in m_handleValidSuggestion.");
+            default:
+            throw std::logic_error("Unhandled handling mode encountered in m_handleValidSuggestion.");
+                break;
+        }
+        if(rawEC == ErrorCode::OK){
+            okCounter++;
+            std::cout<< "Object handled successfully. OkCounter: " << okCounter << std::endl;
+        }
+
+        ErrorHandling::checkForErrorStandardHierarchy(rawEC, error);
+    }
+    if(error != ErrorCode::NOTHING_HAPPENED && error != ErrorCode::OK)
+        return error;
+    if(suggestion.applicability != Suggestor::Suggestion::ApplicabilityType::MULTIPLE && suggestion.applicability != Suggestor::Suggestion::ApplicabilityType::ERROR && okCounter > (int) suggestion.applicability){
+        throw std::runtime_error("Multiple handlings of suggestion detected");
+        error = ErrorCode::MULTIPLE_HANDLINGS_OF_SUGGESTION;
+        return error;
+    }
+    if(okCounter == 0)
+        error = ErrorCode::NOTHING_HAPPENED; //This should not happen.
+    if(redraw || okCounter > 0){
+        ErrorCode drawError = ErrorCode::OK;
+        ErrorHandling::checkForErrorStandardHierarchy(m_draw(), drawError);
+        ErrorHandling::checkForErrorStandardHierarchy(m_renderPresent(), drawError);
+        if(drawError != ErrorCode::OK)
+            return drawError;
+    }
+    return error;
+}
+
+ErrorCode Drawing::m_updateDisplayingEverywhere(){
+    ErrorCode error = ErrorCode::OK;
+    for(GameObject* object: m_queue){
+        ErrorHandling::checkForErrorStandardHierarchy(object->m_updateDisplaying(), error);
+    }
+    return error;
+}

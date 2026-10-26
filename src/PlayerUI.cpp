@@ -50,3 +50,7 @@ void PlayerUI::m_clear(){
     m_associatedDrawing.m_clear();
     m_nextScaleElementX = 0;
 }
+
+void PlayerUI::m_resetRoundBasedShifts(){
+    m_nextScaleElementX = 0;
+}

@@ -27,7 +27,7 @@ SDL_Color ScaleLike::m_currentBackgroundColor(){
         return m_furtherColors.m_backgroundColorWhenForbidden;
     if(m_activeness == Activeness::PERMANENTLY_SELECTED)
         return m_furtherColors.m_colorWhenPermanentlyActive;
-    if(m_activeness == Activeness::ACTIVENESS_ERROR)
+    if((m_activeness & Activeness::ACTIVENESS_ERROR) != Activeness::ZERO)
         return s_errorColor();
     if(m_activeness == Activeness::SECRETLY_ACTIVE)
         return m_furtherColors.m_colorWhenSecretlyActive;
@@ -35,5 +35,7 @@ SDL_Color ScaleLike::m_currentBackgroundColor(){
         return m_furtherColors.m_colorWhenSecretlyPassive;
     if(m_activeness == Activeness::PASSIVE)
         return m_colors.backgroundColorWhenPassive;
+    if((m_activeness & Activeness::LOST) != Activeness::ZERO)
+        return m_furtherColors.m_colorWhenLost;
     else return BaseButton::m_currentBackgroundColor();
 }

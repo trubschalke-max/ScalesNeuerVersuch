@@ -23,6 +23,7 @@ public:
     ~PlayerUI();
     friend class Player;
     void m_clear(); // Clears the associated drawing and resets the next scale element position.
+    void m_resetRoundBasedShifts(); // Resets the next scale element position for the new round.
 };
 
 #endif

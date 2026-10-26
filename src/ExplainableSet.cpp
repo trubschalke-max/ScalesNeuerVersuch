@@ -101,3 +101,22 @@ bool ExplainableSet::m_contains(ExplainableSetValue value){
     }
     return true;
 }
+
+bool ExplainableSet::m_isCorrectlyGuessed(){
+    for(int i(0); i < m_explainables.size(); ++i){
+        if(m_explainables[i].state == WordState::CORRECTLY_TRIED){
+            return true;
+        }
+    }
+    return false;
+}
+
+int ExplainableSet::m_numberOfGuesses(){
+    int count = 0;
+    for(int i(0); i < m_explainables.size(); ++i){
+        if((m_explainables[i].state & WordState::TRIED) == WordState::TRIED){
+            ++count;
+        }
+    }
+    return count;
+}

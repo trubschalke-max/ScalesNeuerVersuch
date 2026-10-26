@@ -31,6 +31,8 @@ public:
     void m_setAcceptsEvents(EventAcceptance ea){m_acceptsEvents = ea;}
     const Suggestor::Suggestion*m_retrieveSuggestion() override; //In case there was no nonempty suggestion, nullptr is returned.
     ErrorCode m_resetSuggestion() override; //The main values are OK if there was one; and NOTHING_HAPPENED if there was none.
+    ErrorCode m_handleValidSuggestion(const Suggestor::Suggestion& suggestion) override; //Redirects the suggestion to the game objects within the drawing.
+    ErrorCode m_updateDisplayingEverywhere() override; //This will update the displaying of all contained game objects.
 };
 
 #endif // DRAWING_HPP

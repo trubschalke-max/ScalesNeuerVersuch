@@ -27,6 +27,7 @@ public:
     friend class HoverableCompositeButtonElementDisplayingSupporter;
     virtual bool m_isHitBy(int x, int y) override;
     void m_setPosition(int x, int y) override; //Sets the position of the composite button element and updates the positions of its sub-buttons.
+    virtual ErrorCode m_refreshButtonsActiveness() = 0; //This function refreshes the activeness of the buttons based on the current state of the composite button element. It is called after a suggestion has been put into effect, and possibly also when the element is created.
 
 };
 

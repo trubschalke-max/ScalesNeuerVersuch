@@ -57,6 +57,20 @@ void Game::m_init(){
 }
 
 ErrorCode Game::m_simpleTest(){
+    std::vector<ObjectData::ScaleData> suggestions;
+    for(int i = 0; i < 3; ++i){
+        std::string aboveString = "Above"+std::to_string(i+1);
+        std::string belowString = "Below"+std::to_string(i+1);
+        suggestions.push_back(ObjectData::ScaleData{aboveString, belowString, ScaleValue::SCALE_1});
+        suggestions.push_back(ObjectData::ScaleData{aboveString, belowString, ScaleValue::SCALE_COMMIT});
+    }
+    for(const auto& suggestion : suggestions){
+        m_suggestionQueue.push_front(std::make_unique<Suggestor::Suggestion>(Suggestor::Suggestion::None()));
+        m_suggestionQueue.front()->scaleData = std::make_unique<ObjectData::ScaleData>(suggestion);
+        m_suggestionQueue.front()->applicability = Suggestor::Suggestion::ApplicabilityType::ONCE;
+        m_suggestionQueue.front()->radicality = Suggestor::Suggestion::Radicality::SELECTION_ONLY;
+        m_suggestionQueue.front()->playerID = PlayerID::PLAYER_1;
+    }
     try{
     ErrorCode error = ErrorCode::OK;
     //     Scale scale("above", "below", ScaleValue::SCALE_1);
@@ -76,6 +90,9 @@ ErrorCode Game::m_simpleTest(){
     //     BasicGameObjectHandler e(&drawing);
     //     return e.m_eventLoop();
     while(!m_gameData.lastRoundReached){
+        if(m_currentRound){
+            checkForError(m_killRound(), m_gameData.error);
+        }
         checkForError(m_initializeRound(), m_gameData.error);
         std::map<PlayerID, std::vector<GameObjectFactory::Recipe>> recipeContainer;
         checkForError(m_currentRound->m_createRoundElementRecipes(recipeContainer), m_gameData.error);
@@ -117,20 +134,15 @@ ErrorCode Game::m_playRound(){
     if(!m_eventHandler)
         return ErrorCode::EVENT_HANDLER_NULL;
      while(finished == CONTINUE){
-        //Reset the current suggestion before entering the event loop.
-        ErrorCode resetError = m_eventHandler->m_resetSuggestion();
-        if(resetError != ErrorCode::OK && resetError != ErrorCode::NOTHING_HAPPENED){// I'm not sure if, other than for the first iteration, NOTHING_HAPPENED should occur though.
-            checkForErrorStandardHierarchy(resetError, error);
-        }
-        checkForErrorStandardHierarchy(m_eventHandler->m_eventLoop(), error);
-        auto sugg = m_eventHandler->m_retrieveSuggestion();
-        if(!sugg){//No suggestion made. This shouldn't normally happen though, because why would the event loop have been exited then?
+        const Suggestor::Suggestion* sugg = m_currentSuggestion();
+        checkForErrorStandardHierarchy(m_gameData.error, error);
+        if(!sugg){//No suggestion made. This should normally not happen.
             continue;
         }
         ErrorCode validationRaw = m_currentRound->m_validate(*sugg);
         ErrorCode validation = m_interpretValidationError(validationRaw);
         if(validation == ErrorCode::OK){
-            checkForErrorStandardHierarchy(m_currentRound->m_handleValidSuggestion(*sugg), error);
+            checkForErrorStandardHierarchy(m_handleValidSuggestion(*sugg), error);
         } else if(validation == ErrorCode::IGNORE_THIS){
             continue;
         } else {
@@ -150,19 +162,27 @@ ErrorCode Game::m_playRound(){
 }
 
 ErrorCode Game::m_initializeRound(){
+    ErrorCode error = ErrorCode::OK;
     if(m_currentRound){
         return ErrorCode::OLD_ROUND_NOT_KILLED;
     }
     auto playerIDs = m_playerIDs();
     m_currentRound = std::make_unique<Round>(m_currentPlayerID(), playerIDs, 3, 24);
-    return m_currentRound->m_initializeRound();
+    for(auto& player: m_playerList){
+        checkForError(player->m_prepareForNewRound(), error);
+    }
+    checkForError(m_currentRound->m_initializeRound(), error);
+    return error;
 }
 
 ErrorCode Game::m_killRound(){
+    ErrorCode error = ErrorCode::OK;
     if(!m_currentRound){
         return ErrorCode::NO_CURRENT_ROUND;
     }
+    checkForError(m_currentRound->m_shutdown(&m_players), error);
     m_gameData.roundHistory.push_back(std::move(m_currentRound->m_roundData));
+    m_currentRound.reset();
     return ErrorCode::OK;
 }
 
@@ -242,3 +262,32 @@ ErrorCode Game::m_confirmRoundReadiness(){
     checkForError(error, m_gameData.error);
     return error;
 }
+
+ErrorCode Game::m_handleValidSuggestion(const Suggestor::Suggestion& suggestion){//Quick fix: Have all game objects update their displaying. This is somewhat ugly given that many did so earlier, but it should at least work.
+    if(!m_currentRound){
+        return ErrorCode::NO_CURRENT_ROUND;
+    }
+    ErrorCode error = m_eventHandler->m_handleValidSuggestion(suggestion);
+    checkForErrorStandardHierarchy(error, m_gameData.error);
+    ErrorCode updateError = m_eventHandler->m_updateDisplaying();
+    checkForErrorStandardHierarchy(m_currentRound->m_reactToSuggestion(suggestion, error), m_gameData.error); 
+    return error;
+}
+
+const Suggestor::Suggestion* Game::m_currentSuggestion(){
+    Suggestor::Suggestion* sugg = nullptr;
+    //Reset the current suggestion before entering the event loop.
+    if(!m_suggestionQueue.empty()){
+        sugg = m_suggestionQueue.back().get();
+        std::swap(m_tmpSuggestion, m_suggestionQueue.back());
+        m_suggestionQueue.pop_back();
+        return sugg;
+    }
+    ErrorCode resetError = m_eventHandler->m_resetSuggestion();
+    if(resetError != ErrorCode::OK && resetError != ErrorCode::NOTHING_HAPPENED){// I'm not sure if, other than for the first iteration, NOTHING_HAPPENED should occur though.
+        checkForErrorStandardHierarchy(resetError, m_gameData.error);
+    }
+    checkForErrorStandardHierarchy(m_eventHandler->m_eventLoop(), m_gameData.error);
+    return m_eventHandler->m_retrieveSuggestion();
+}
+

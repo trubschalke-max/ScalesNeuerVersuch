@@ -10,8 +10,9 @@ using ObjectData::ScaleData;
 using ObjectData::ScaleValue; 
 using ObjectData::State;
 
-ScaleElement::ScaleElement(ObjectData::PlayerID playerID, int x, int y, Scale* scale, Layer layer): Comp(playerID, x,y, layer), m_associatedScale(scale)
+ScaleElement::ScaleElement(ObjectData::PlayerID playerID, int x, int y, Scale* scale, bool isForExplainingPlayer, Layer layer): Comp(playerID, x,y, layer), m_associatedScale(scale), m_isForExplainingPlayer(isForExplainingPlayer)
 {
+    m_setHandlingMode(isForExplainingPlayer ? GameObject::HandlingMode::SUGGEST : GameObject::HandlingMode::DISPLAY_ONLY);
     m_colors = s_standardColors();
     if(m_createButtons() != ErrorCode::OK){
         throw std::runtime_error("Unable to create buttons for scale!");
@@ -60,7 +61,8 @@ ScaleElement::ColorSet ScaleElement::s_standardColors(){
             SDL_Color{210, 210, 150},
             SDL_Color{235,235,190},
             SDL_Color{255, 150, 225},
-            SDL_Color{150, 150, 255}
+            SDL_Color{150, 150, 255},
+            SDL_Color{255,150, 0}
         }
     };
 }
@@ -146,6 +148,10 @@ typedef ObjectData::Activeness BA;
 
 BA ScaleElement::m_figureOutActiveness(ObjectData::ScaleValue whatFor){
     auto data = m_associatedScale->m_Data();
+    auto& button = m_buttons[m_buttonIndexFor(whatFor)];
+    Activeness whatToReturn, hoveredActiveness;
+    if(button->m_Activeness() == BA::ACTIVENESS_ERROR)
+        throw std::runtime_error("Some kind of activeness error!");
     switch(data.state){
         case State::COMMITTED: 
             if(whatFor == m_associatedScale->m_scaleValueForCommitting())
@@ -156,33 +162,33 @@ BA ScaleElement::m_figureOutActiveness(ObjectData::ScaleValue whatFor){
                 return BA::PERMANENTLY_SELECTED;
             else return BA::FORBIDDEN;
         case State::NOT_YET_COMMITTED:
+        case State::NOT_READY:
+            hoveredActiveness = m_buttons[m_buttonIndexFor(whatFor)]->m_Activeness() &   Activeness::HOVERED_OVER;
             if(data.selection == whatFor){
-                switch(m_buttons[m_buttonIndexFor(whatFor)]->m_Activeness()){
-                    case BA::HOVERED_OVER_AND_ACTIVE: case BA::HOVERED_OVER_AND_PASSIVE:
-                        return BA::HOVERED_OVER_AND_ACTIVE;
-                    case BA::FORBIDDEN: case BA::PERMANENTLY_SELECTED: throw std::logic_error("Why would a button be forbidden or permanently selected without the scale being committed?");
-                    case BA::ACTIVENESS_ERROR: default: throw std::runtime_error("Some kind of activeness error!");
-                }
+                whatToReturn = Activeness::ACTIVE;
             }
             else{// if wdata.selection != whatFor
-                switch(m_buttons[m_buttonIndexFor(whatFor)]->m_Activeness()){
-                    case BA::HOVERED_OVER_AND_ACTIVE: case BA::HOVERED_OVER_AND_PASSIVE:
-                        return BA::HOVERED_OVER_AND_PASSIVE;
-                    case BA::ACTIVENESS_ERROR: throw std::runtime_error("Some kind of activeness/passiveness error!");
-                    default: return BA::PASSIVE;
-                }
+                whatToReturn = Activeness::PASSIVE;
             }
+            whatToReturn = static_cast<Activeness>(whatToReturn | hoveredActiveness);
+            return whatToReturn;
         default: return Activeness::ACTIVENESS_ERROR;
     }
 }
 
 ErrorCode ScaleElement::m_putIntoEffect(const Suggestor::Suggestion& suggestion){
     ErrorCode error = ErrorCode::NOTHING_HAPPENED;
-    if(!suggestion.scaleData)
-        return ErrorCode::NOTHING_HAPPENED;
-    //Determine what actually changed
+    if(!m_isRelevant(suggestion))//Only for a sanity check, this sould have been checked before calling this function.
+        return ErrorCode::IRRELEVANT_SUGGESTION;
+    if(suggestion.radicality == Suggestor::Suggestion::Radicality::FULL_CHANGE){//The suggestion indicates a full change to the scale. We replace the entire scale with one configured as suggested.
+        error = ErrorCode::OK;
+        *m_associatedScale = Scale(*suggestion.scaleData);
+    }
 
-    if(suggestion.scaleData->coincidesWith(m_associatedScale->m_Data())){
+    if(suggestion.scaleData->above.compare(m_associatedScale->m_Data().above) != 0 || suggestion.scaleData->below.compare(m_associatedScale->m_Data().below) != 0){//The suggestion is for a different scale
+        return ErrorCode::NOTHING_HAPPENED;
+    }
+    if(suggestion.scaleData->selection == m_associatedScale->m_Data().selection){
         return ErrorCode::NOTHING_HAPPENED;
     }
     if(m_associatedScale->m_Data().state == State::COMMITTED){
@@ -191,27 +197,34 @@ ErrorCode ScaleElement::m_putIntoEffect(const Suggestor::Suggestion& suggestion)
     }
     if(suggestion.scaleData->state == State::COMMITTED){//I do not intend to commit this way.
         throw std::logic_error("Commits should come from a scale value COMMIT");
-        //ErrorHandling::checkForErrorStandardHierarchy(m_associatedScale->m_commit(), error); (Probably, I'll never need this line)
     }
     if(suggestion.scaleData->selection != m_associatedScale->m_Data().selection){
         ErrorHandling::checkForErrorStandardHierarchy(m_handleScaleValueSuggestion(suggestion.scaleData->selection), error);
     }
-    //Refresh the buttons' activeness, if necessary
+    //Refresh the buttons' activeness
+    if(error == ErrorCode::SUCCESS)
+        error = ErrorCode::OK;
     switch(error){
         case ErrorCode::INVALID_REDOING:
-        return ErrorCode::NOTHING_HAPPENED;
         case ErrorCode::INVALID_COMMIT:
-        return ErrorCode::NOTHING_HAPPENED;
+        case ErrorCode::NOTHING_HAPPENED:
+            error =  ErrorCode::NOTHING_HAPPENED;
+            break;
+        case ErrorCode::OK: 
+            break;
         case ErrorCode::INVALID_SCALE_SELECTION: //This really should not happen.
         throw std::logic_error("Something went wrong in ScaleElement::m_putIntoEffect(): The suggestion was to select an invalid scale value");
-        case ErrorCode::SUCCESS:
-        error = ErrorCode::OK;
-        ErrorHandling::checkForErrorStandardHierarchy(m_refreshButtonsActiveness(), error);
-        return error;
         default:
         throw std::logic_error("Something went wrong in ScaleElement::m_putIntoEffect(): Unexpected error code");
+    }
+    //If the error code is now NOTHING_HAPPENED or OK, I will refresh activeness.
+    if(error == ErrorCode::NOTHING_HAPPENED || error == ErrorCode::OK){
+        ErrorCode refreshError = m_refreshButtonsActiveness();
+        if(refreshError != ErrorCode::OK)
+            error = refreshError;
         return error;
     }
+    throw std::logic_error("Something went wrong in ScaleElement::m_putIntoEffect(): Unhandled error code");
 }
 
 ErrorCode ScaleElement::m_handleScaleValueSuggestion(ObjectData::ScaleValue selectedValue){
@@ -229,4 +242,33 @@ ErrorCode ScaleElement::m_handleScaleValueSuggestion(ObjectData::ScaleValue sele
 
 bool ScaleElement::m_showHoveredState(){
     return m_associatedScale->m_Data().state != State::COMMITTED;
+}
+
+bool ScaleElement::m_isRelevant(const Suggestor::Suggestion& suggestion){
+    if(!suggestion.scaleData)
+        return false;
+    //Determine what actually changed
+
+    if(suggestion.radicality == Suggestor::Suggestion::Radicality::NOTHING_AT_ALL){
+        return false;
+    }
+
+    if(suggestion.radicality == Suggestor::Suggestion::Radicality::SELECTION_ONLY){
+        return suggestion.scaleData->coincidesWith(m_associatedScale->m_Data(), false);
+    }
+
+    if(suggestion.radicality == Suggestor::Suggestion::Radicality::FULL_CHANGE){
+        ScaleElement* targetScaleElement = dynamic_cast<ScaleElement*>(suggestion.target);
+        if(targetScaleElement){
+            if(targetScaleElement->m_associatedScale == m_associatedScale){
+                if(suggestion.scaleData->coincidesWith(m_associatedScale->m_Data())){
+                    return false;
+                }
+                else{//Change the entire scale
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }

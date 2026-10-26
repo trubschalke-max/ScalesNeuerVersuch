@@ -67,6 +67,10 @@ ErrorCode GameObject::m_resetSuggestion(){
     return ErrorCode::OK;
 }
 
+ErrorCode GameObject::m_updateDisplaying(){
+    return m_displayingSupporter->m_updateDisplaying();
+}
+
 std::initializer_list<int> GameObject::s_sdlEventTypesRelevantForGameObjects(){
     return {SDL_MOUSEBUTTONDOWN, SDL_MOUSEBUTTONUP, SDL_MOUSEMOTION, SDL_KEYDOWN, SDL_KEYUP};
 }

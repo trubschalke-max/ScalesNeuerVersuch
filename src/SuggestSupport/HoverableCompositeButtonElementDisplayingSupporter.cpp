@@ -38,4 +38,12 @@ ErrorCode CompSupp::m_changeDisplayingDueTo(const SDL_Event& event){
     return error;
 }
 
+ErrorCode CompSupp::m_updateDisplaying(){
+    ErrorCode rawEC = m_element->m_refreshButtonsActiveness();
+    if(rawEC != ErrorCode::OK)
+        return rawEC;
+    return ErrorCode::MERELY_VISUAL_IMPLICATIONS;
+
+}
+
 

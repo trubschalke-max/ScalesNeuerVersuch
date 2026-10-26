@@ -50,3 +50,11 @@ const Suggestor::Suggestion*BasicGameObjectHandler::m_retrieveSuggestion(){
 ErrorCode BasicGameObjectHandler::m_resetSuggestion(){
     return m_whatToDraw->m_resetSuggestion();
 }
+
+ErrorCode BasicGameObjectHandler::m_handleValidSuggestion(const Suggestor::Suggestion& suggestion){
+    return m_whatToDraw->m_handleValidSuggestion(suggestion);
+}
+
+ErrorCode BasicGameObjectHandler::m_updateDisplaying(){
+    return m_whatToDraw->m_updateDisplayingEverywhere();
+}

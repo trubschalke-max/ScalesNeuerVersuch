@@ -19,26 +19,31 @@ class Game //The game needs for some kind of logic checker class.
 public:
     struct GameData{
         unsigned short int numberOfPlayers;
-        std::vector<Round::RoundData> roundHistory;
+        std::vector<std::unique_ptr<Round::RoundData>> roundHistory;
         ErrorCode error = ErrorCode::OK;
         bool lastRoundReached = false;
     };
     enum Continuation{CONTINUE, FINISH_ROUND, FINISH_GAME};
 private:
-    //std::unique_ptr<Window> m_mainWindow;
+
+    std::list<std::unique_ptr<Suggestor::Suggestion>> m_suggestionQueue;
+    std::unique_ptr<Suggestor::Suggestion> m_tmpSuggestion = nullptr;
+
+//std::unique_ptr<Window> m_mainWindow;
     std::unique_ptr<Graphics::Font> m_theFont;
-    std::unique_ptr<Round> m_currentRound; 
+    std::unique_ptr<Round> m_currentRound;
     std::vector<std::unique_ptr<Player>> m_playerList; //Storing the player objects. They might go into a playermanager class, but that's hypothetical.
     std::map<ObjectData::PlayerID, Player*> m_players; //I could also use the vector directly. But this is easier due to direct access by PlayerID (and not starting an array at 0)
     std::unique_ptr<BasicGameObjectHandler> m_eventHandler;
     GameData m_gameData;
     void m_init(); //Initializes the game, including SDL, TTF, font, players, and event handler. An error code is stored in m_gameData.error if something goes wrong.
-    bool m_isGameFinished(){return false;} // I do not know how that may be implemented. Right now, it will always return false.
+    bool m_isGameFinished(){return false;} // I do not know how that may be implemented. Right now, it will always return false. I could imagine a fixed number of rounds or a win condition being used to determine this.
     ErrorCode m_initPlayers();
     ErrorCode m_initPlayer(int index);
     std::string m_figureOutPlayerName(ObjectData::PlayerID playerID); //This could theoretically involve opening a dialog to ask the player for their name, or even something crazier with online interactions.
     ErrorCode m_interpretValidationError(ErrorCode error); //The idea is to determine if the handling should equate to the one of IGNORE_THIS, OK, or some other error code.
-
+    ErrorCode m_handleValidSuggestion(const Suggestor::Suggestion& suggestion); //This will, for now, merely redirect the suggestion to the event handler, as all currently valid valid suggestions are associated to game objects.
+    const Suggestor::Suggestion* m_currentSuggestion(); //This either fetches from the queue or from the event handler.
 
     auto& m_RoundHistory(){return m_gameData.roundHistory;}
 public:

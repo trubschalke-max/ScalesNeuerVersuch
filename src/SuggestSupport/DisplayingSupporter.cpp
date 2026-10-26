@@ -23,3 +23,7 @@ bool DisplayingSupporter::m_isRelevantForDisplaying(const SDL_Event& event){
         default: return false;
     }
 }
+
+ErrorCode DisplayingSupporter::m_updateDisplaying(){
+    return ErrorCode::NOTHING_HAPPENED;
+}

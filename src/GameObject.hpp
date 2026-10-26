@@ -12,7 +12,9 @@ public:
     enum HandlingMode{DO_NOTHING, DISPLAY_ONLY, SUGGEST, DIRECT_HANDLING};
     enum Relevance{IRRELEVANT, RELEVANT_FOR_DISPLAYING, RELEVANT = DIRECT_HANDLING};
     enum{POSITION_UNDEFINED = -2000};
+    enum Longevity{PERMANENT, ONE_ROUND_LONG};
 protected: 
+    Longevity m_longevity = ONE_ROUND_LONG;
     int m_x = POSITION_UNDEFINED;
     int m_y = POSITION_UNDEFINED;
     Layer m_layer;
@@ -34,12 +36,17 @@ public:
     Suggestor::Suggestion m_suggestFor(const SDL_Event& event); //This redirects to the suggestor's m_suggestFor(), and puts the playerID into the suggestion.
     ErrorCode m_changeDisplayingDueTo(const SDL_Event& event); //The expected results are either NOTHING_HAPPENED or MERELY_VISUAL_IMPLICATIONS.
     Relevance m_relevanceOf(const SDL_Event& event);
-    virtual ErrorCode m_putIntoEffect(const Suggestor::Suggestion& suggestion); //The default behavior is to throw an exception because this should not have been called in the default case.
+    virtual ErrorCode m_putIntoEffect(const Suggestor::Suggestion& suggestion); //The default behavior is to throw an exception because this should not have been called in the default case. It is expected from any implementation that display upgrades are being triggered by this function.
     virtual ErrorCode m_resetSuggestion();
     const Suggestor::Suggestion& m_CurrentSuggestion(){return m_currentSuggestion;}
     virtual void m_setPosition(int x, int y){m_x = x; m_y = y;} //When created by the factory, the initial position is not yet clear. Thus, a setter is needed. The virtuality comes from the fact that certain objects consist of many subobjects.
-
+    virtual bool m_isRelevant(const Suggestor::Suggestion& suggestion){return false;}//A, say, explainablesetelement should not deal with a scales related suggestion.
     static std::initializer_list<int> s_sdlEventTypesRelevantForGameObjects();
+    void m_setHandlingMode(HandlingMode mode){m_mode = mode;}
+    auto m_HandlingMode(){return m_mode;}
+    ErrorCode m_updateDisplaying(); //This redirects to the displaying supporter's m_updateDisplaying().
+    Longevity m_Longevity(){return m_longevity;}
+    void m_setLongevity(Longevity longevity){m_longevity = longevity;}
 
     friend class Player;
 

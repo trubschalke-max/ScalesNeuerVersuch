@@ -16,6 +16,7 @@ public:
     virtual ~HoverableCompositeButtonElementDisplayingSupporter();
     virtual ErrorCode m_changeDisplayingDueTo(const SDL_Event& event) override; //The expected results are either NOTHING_HAPPENED or MERELY_VISUAL_IMPLICATIONS.
     virtual bool m_isRelevantForDisplaying(const SDL_Event& event) override; 
+    virtual ErrorCode m_updateDisplaying() override; //This redirects to the refreshing of buttons' activeness.
 };
 
 typedef HoverableCompositeButtonElementDisplayingSupporter CompSupp;

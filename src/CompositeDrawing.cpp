@@ -121,3 +121,33 @@ ErrorCode CompositeDrawing::m_resetSuggestion(){
     }
     return error;
 }
+
+ErrorCode CompositeDrawing::m_handleValidSuggestion(const Suggestor::Suggestion& suggestion){//This makes me regret that drawings are not composite drawings.
+  ErrorCode error = ErrorCode::NOTHING_HAPPENED;
+    int okCounter = 0;
+    for(auto& pair: m_drawings){
+        ErrorCode rawEC = pair.second->m_handleValidSuggestion(suggestion);
+        if(rawEC == ErrorCode::OK)
+            okCounter++;
+        ErrorHandling::checkForErrorStandardHierarchy(rawEC, error);
+    }
+    if(error != ErrorCode::NOTHING_HAPPENED && error != ErrorCode::OK)
+        return error;
+    if(suggestion.applicability != Suggestor::Suggestion::ApplicabilityType::MULTIPLE && suggestion.applicability != Suggestor::Suggestion::ApplicabilityType::ERROR && okCounter > (int) suggestion.applicability){
+        throw std::runtime_error("Multiple handlings of suggestion detected");
+        error = ErrorCode::MULTIPLE_HANDLINGS_OF_SUGGESTION;
+    }
+    if(okCounter == 0)
+        error = ErrorCode::NOTHING_HAPPENED; //This should not happen.
+    if(okCounter == 1)
+        error = ErrorCode::OK;
+    return error;
+}
+
+ErrorCode CompositeDrawing::m_updateDisplayingEverywhere(){
+    ErrorCode error = ErrorCode::OK;
+    for(auto& pair : m_drawings){
+        checkForErrorStandardHierarchy(pair.second->m_updateDisplayingEverywhere(), error);
+    }
+    return error;
+}

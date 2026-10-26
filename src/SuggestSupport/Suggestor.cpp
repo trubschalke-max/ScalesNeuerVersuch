@@ -46,7 +46,10 @@ Suggestor::Suggestion Suggestor::m_suggestFor(const SDL_Event& event){
     if(!m_isRelevantForSuggesting(event)){
         throw std::runtime_error("Suggesting an irrelevant event");
     }
-    return m_suggestForRelevantEvent(event);
+    Suggestion sug = m_suggestForRelevantEvent(event);
+    if(!sug.m_empty())
+      sug.radicality = m_determineRadicality(event);
+    return sug;
 }
 
 bool Suggestor::m_isRelevantForSuggesting(const SDL_Event& event){
@@ -62,4 +65,8 @@ Suggestor::Suggestion Suggestor::m_suggestForRelevantEvent(const SDL_Event& even
     sug.buttonElement = nullptr;
     sug.certainlyKnownError = ErrorCode::OK;
     return sug;
+}
+
+Suggestor::Suggestion::Radicality Suggestor::m_determineRadicality(const SDL_Event& event){
+    return m_standardRadicality;
 }

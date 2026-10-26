@@ -25,7 +25,7 @@ GameObject* GameObjectFactory::m_createGameObject(const Recipe& recipe){
         case GameObjectType::SCALE_ELEMENT:
             if(!recipe.scale)
                 throw InvalidRecipeException("No scale");
-            return new ScaleElement(recipe.playerID, recipe.shapeAndPlace.x, recipe.shapeAndPlace.y, recipe.scale, recipe.layer);
+            return new ScaleElement(recipe.playerID, recipe.shapeAndPlace.x, recipe.shapeAndPlace.y, recipe.scale, recipe.isForExplainingPlayer, recipe.layer);
         case GameObjectType::EXPLAINABLE_SET_ELEMENT:
             if(!recipe.exSet)
                 throw InvalidRecipeException("No explainable set");

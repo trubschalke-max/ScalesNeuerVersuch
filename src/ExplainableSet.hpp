@@ -21,6 +21,8 @@ public:
     ErrorCode m_setCorrectValue(ObjectData::ExplainableSetValue value); //This function sets the correct value. If the value is not in the set, it returns INVALID_VALUE. If there are multiple correct values, it returns MULTIPLE_CORRECT_VALUES. If the value is already correct, it returns ALREADY_CORRECT. Otherwise, it sets the value to be correct and returns OK.
     ErrorCode m_guess(ObjectData::ExplainableSetValue value); //This function marks the guessed value as tried. If the value is not in the set, it returns INVALID_WORD_SELECTION. If the value has already been tried, it returns WORD_ALREADY_TRIED. If the value is wrong, it returns ErrorCode::SUCCESS. If the value is correct, it returns ErrorCode::CORRECT_WORD_WAS_JUST_SELECTED.^
     bool m_contains(ObjectData::ExplainableSetValue value);
+    bool m_isCorrectlyGuessed(); //This function returns true if the correct value has been guessed, false otherwise.
+    int m_numberOfGuesses(); //This function returns the number of guesses made so far.
 };
 
 struct MultipleCorrectWords: public std::exception{

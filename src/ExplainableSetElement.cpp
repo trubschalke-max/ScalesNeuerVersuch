@@ -35,7 +35,8 @@ Comp::ColorSet ExplainableSetElement::s_standardColors(){
             SDL_Color{210, 210, 150},
             SDL_Color{235,235,190},
             SDL_Color{255, 150, 225},
-            SDL_Color{150, 150, 255}
+            SDL_Color{150, 150, 255},
+            SDL_Color{255,150, 0}
         }
     };
 }
@@ -84,7 +85,7 @@ ObjectData::Activeness ExplainableSetElement::m_figureOutActiveness(ObjectData::
         case WordState::WRONG_AND_TRIED:
             return ObjectData::Activeness::FORBIDDEN;
         case WordState::CORRECTLY_TRIED:
-            return ObjectData::Activeness::PERMANENTLY_SELECTED; //Actually, the players try to guess the wrong words. In the future, I might want to implement a warning color for a losing player, but I don't have one yet. 
+            return ObjectData::Activeness::PERMANENTLY_SELECTED & ObjectData::Activeness::LOST; //Actually, the players try to guess the wrong words. In the future, I might want to implement a warning color for a losing player, but I don't have one yet. 
         default:
             return ObjectData::Activeness::ACTIVENESS_ERROR; //It does not yet make sense for all values.
     }
@@ -100,13 +101,18 @@ ErrorCode ExplainableSetElement::m_putIntoEffect(const Suggestor::Suggestion& su
     //if (suggestion.selectedWordValue) is handled below.
     ErrorCode error =m_handleWordSelectionSuggestion(*suggestion.selectedWordValue);
     if(error == ErrorCode::OK || error == ErrorCode::SUCCESS || error == ErrorCode::CORRECT_WORD_WAS_JUST_SELECTED){
+        error = ErrorCode::OK;
         ErrorHandling::checkForErrorStandardHierarchy(m_refreshButtonsActiveness(), error); 
+        return error;
     }
     if(error == ErrorCode::INVALID_WORD_SELECTION || error == ErrorCode::WORD_ALREADY_TRIED || error == ErrorCode::CORRECT_WORD_ALREADY_SELECTED){
-        return ErrorCode::NOTHING_HAPPENED;
+        error = ErrorCode::NOTHING_HAPPENED;
+        ErrorCode refreshError = m_refreshButtonsActiveness();
+        if(refreshError != ErrorCode::OK)
+            error = refreshError;
+        return error;
     }
-    std::for_each(m_explainables->m_Explainables().begin(), m_explainables->m_Explainables().end(), [](const Explainable& e){std::cout << "Word \"" << e.word << "\" has state " << toString(e.state) << std::endl;});
-    return error;
+    throw std::logic_error("Something went wrong in ExplainableSetElement::m_putIntoEffect(): Unhandled error code");
 }
 
 ErrorCode ExplainableSetElement::m_refreshButtonsActiveness(){
@@ -114,11 +120,11 @@ ErrorCode ExplainableSetElement::m_refreshButtonsActiveness(){
     if(explainables.size() != m_buttons.size()){
         throw std::logic_error("Inconsistent sizes between explainables and buttons"); //This should not happen, because the buttons are created based on the explainables, and the explainables should not change in size.
     }
-    for(int i(0); i < 4; ++i){ //For testing/debugging purposes, I will only refresh the first four buttons. 
-//     i < explainables.size(); ++i){
+    for(int i(0); i < explainables.size(); ++i){ //For debugging purposes, conditional breakpoints might be a sound approach to not go through this too often.
         auto& button = m_buttons[i];
         auto& explainable = explainables[i];
-        int hoveredActiveness = ((int) explainable.state) & ((int) WordState::TRIED) == 0 ? (int) Activeness::HOVERED_OVER : 0;
+        int hoveredActiveness = ((int) explainable.state) & ((int) WordState::TRIED) == 0 ? (int) Activeness::HOVERED_OVER : 0; 
+        hoveredActiveness = hoveredActiveness & (int)button->m_Activeness();
         int newActiveness = (int) m_figureOutActiveness(explainable.state);
         button->m_setActiveness((Activeness)(newActiveness | hoveredActiveness)); //If the button is hovered over, it should remain hovered over, even if the activeness changes.
     }
@@ -137,3 +143,17 @@ ErrorCode ExplainableSetElement::m_handleWordSelectionSuggestion(ExplainableSetV
     return error;
 }
 
+bool ExplainableSetElement::m_isRelevant(const Suggestor::Suggestion& suggestion){
+    switch(suggestion.radicality){
+        case Suggestor::Suggestion::Radicality::FULL_CHANGE://This is a little easier than for scales, because there do not seem to be multiple sets of explainables.
+            if(suggestion.explainables && !suggestion.explainables->empty())
+                return true;
+            return false;
+        case Suggestor::Suggestion::Radicality::SELECTION_ONLY:
+            if(suggestion.selectedWordValue)
+                return true;
+            return false;
+        default:
+            throw std::logic_error("Unhandled radicality in ExplainableSetElement::m_isRelevant()");
+    }
+}

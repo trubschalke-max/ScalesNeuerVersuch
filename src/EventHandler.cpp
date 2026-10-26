@@ -10,7 +10,7 @@ Displayer::Displayer(DrawingObject* whatToDraw): EventHandler(whatToDraw){if(!wh
 Displayer::~Displayer(){}
 
 bool EventHandler::m_isQuit(const SDL_Event& event){
-    if(event.type == SDL_QUIT)
+    if(event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE)
         return true;
     return false;
 }

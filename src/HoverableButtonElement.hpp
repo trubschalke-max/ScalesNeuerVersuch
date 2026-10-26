@@ -14,6 +14,7 @@ public:
         SDL_Color m_colorWhenPermanentlyActive;
         SDL_Color m_colorWhenSecretlyActive;
         SDL_Color m_colorWhenSecretlyPassive;
+        SDL_Color m_colorWhenLost;
     };
 protected: 
     ColorSetExtension m_furtherColors;
