@@ -12,11 +12,12 @@ using ObjectData::ExplainableSetValue;
 #include "Player.hpp"
  
 
-Round::Round(PlayerID explainingPlayer, const std::vector<PlayerID>& players, unsigned short int scalesCount, unsigned short int explainablesCount, unsigned short int scaleMaxValue):    m_scalesCount(scalesCount),    m_explainablesCount(explainablesCount), m_scaleMaxValue(scaleMaxValue)
+Round::Round(int nr, PlayerID explainingPlayer, const std::vector<PlayerID>& players, unsigned short int scalesCount, unsigned short int explainablesCount, unsigned short int scaleMaxValue):    m_scalesCount(scalesCount),    m_explainablesCount(explainablesCount), m_scaleMaxValue(scaleMaxValue)
 {
     m_roundData = std::make_unique<RoundData>();
     m_roundData->explainingPlayer = explainingPlayer;
     m_roundData->players = players;
+    m_roundData->roundNumber = nr;
     m_roundData->guessingPlayer = m_firstGuessingPlayer();
 }
 
@@ -48,7 +49,7 @@ std::vector<ObjectData::ScaleData> Round::m_generateScaleData(){//For now, a tem
     return scaleData;
 }
 
-ErrorCode Round::m_initializeRound(){
+ErrorCode Round::m_initRound(){
     auto explainableWords = m_generateExplainableWords();
     auto scaleData = m_generateScaleData();
     unsigned short int correctExplainableValue = m_generateCorrectExplainableValue();
@@ -103,7 +104,7 @@ ErrorCode Round::m_validate(const Suggestor::Suggestion& suggestion){
             return ErrorCode::SCALES_NOT_COMMITTED;
         }
     }
-    return ErrorCode::OK;
+    return error;
 }
 
 ErrorCode Round::m_updateGuessingPlayer(){// Updates the guessing player to the next one in line, skipping the explaining player. Until now, this is too complicated of a game logic. It shall later be triggered after a guess that successfully misses the correct word.
@@ -251,6 +252,9 @@ ErrorCode Round::m_reactToSuggestion(const Suggestor::Suggestion& suggestion, Er
             checkForError(m_reactToScaleModification(suggestion), error);
         }
     }
+    if(error != ErrorCode::OK && error != ErrorCode::NOTHING_HAPPENED){
+        throw std::runtime_error("Error occurred during suggestion handling: " + std::to_string(static_cast<int>(error)));
+    }
     return error;
 }
 
@@ -268,18 +272,19 @@ bool Round::m_isRoundFinished(){
 }
 
 ErrorCode Round::m_reactToWordSelection(const Suggestor::Suggestion& suggestion){
+    ErrorCode error = ErrorCode::OK;
     //If the selected word value is correct, it is assumed that the game will notice via the m_isFinished() function.
     //In the future, I might assign points to players. It might even be useful to have both game and round manage a queue of suggestions, including point suggestions.
     if(!suggestion.selectedWordValue){
         throw std::logic_error("No selected word value provided in the suggestion.");
     }
     if(m_roundData->explainableSet->m_isCorrectlyGuessed()){
-        return ErrorCode::NOTHING_HAPPENED;
+    error = ErrorCode::NOTHING_HAPPENED;
     }
     else{
-        ErrorCode error = m_updateGuessingPlayer();
-        return error;
-    }
+        error = m_updateGuessingPlayer();
+    }    
+    return error;
 }
 
 ErrorCode Round::m_reactToScaleModification(const Suggestor::Suggestion& suggestion){
@@ -290,8 +295,8 @@ ErrorCode Round::m_reactToScaleModification(const Suggestor::Suggestion& suggest
     return ErrorCode::NOTHING_HAPPENED;
 }
 
-ErrorCode Round::m_shutdown(std::map<ObjectData::PlayerID, Player*>* m_players){
-    ErrorCode error = ErrorCode::OK;
+ErrorCode Round::m_shutdown(std::map<ObjectData::PlayerID, Player*>* m_players, std::unique_ptr<RoundData>& dumpData){
+ErrorCode error = ErrorCode::OK;
     if(!m_players){
         throw std::logic_error("No player map provided to shutdown.");
     }
@@ -306,7 +311,24 @@ ErrorCode Round::m_shutdown(std::map<ObjectData::PlayerID, Player*>* m_players){
     }
 
     RoundData tmp; // Reset the round data to its default state. It is assumed that the round data is being moved to the round history before this call. In particular, std::move has been called already.
+    // Determine points before (!) resetting the round data.
+    auto points = m_roundData->m_determinePoints();
+    dumpData = std::move(m_roundData);
     m_roundData = std::unique_ptr<RoundData>(new RoundData());
+    if(points.empty()){
+        checkForError(ErrorCode::NO_POINTS_COMPUTED, error);
+    }
+    for(const auto& pair : points){
+        ObjectData::PlayerID playerID = pair.first;
+        int playerPoints = pair.second;
+        if(playerPoints != 0){
+            m_suggestionsLeftToHandle.push_front(std::make_unique<Suggestor::Suggestion>());
+            m_suggestionsLeftToHandle.front()->pointsIncrease = playerPoints;
+            m_suggestionsLeftToHandle.front()->playerID = playerID;
+            m_suggestionsLeftToHandle.front()->applicability = Suggestor::Suggestion::ApplicabilityType::ONCE;
+            m_suggestionsLeftToHandle.front()->radicality = Suggestor::Suggestion::Radicality::PARTIAL_CHANGE_ONLY;
+        }
+    }
 
     return error;
 }
@@ -318,13 +340,62 @@ int Round::RoundData::m_numberOfGuessesMade() const{
             ++guesses;
         }
     }
+    return guesses;
 }
 
 bool Round::RoundData::m_isCorrectlyGuessed() const{
     for(const auto& explainable : explainableSet->m_Explainables()){
         if((explainable.state & ObjectData::WordState::CORRECT) != ObjectData::WordState::ZERO){
-            return true;
+            if((explainable.state & ObjectData::WordState::TRIED) != ObjectData::WordState::ZERO){
+                return true;
+            }
         }
     }
     return false;
+}
+
+std::map<ObjectData::PlayerID, int> Round::RoundData::m_determinePoints(bool guesserHasGuessedAlready) const{
+    std::map<ObjectData::PlayerID, int> points;
+    int guessingplayerIndex;
+    int playerIndex = 0;
+    bool committed = m_areAllScalesCommitted();
+    const int guessersCount = static_cast<int>(players.size()) - 1; // Exclude the explaining player from the guessers count.
+    for(const auto& player : players){
+        guessingplayerIndex = m_indexOfPlayer(player);
+        points[player] = 0; 
+        if(!committed)
+            continue; // Skip scoring for players if not all scales are committed.
+        //Question: Who guessed it wrong?
+        //One point for each incorrect guess, minus three points for a correct guess. The explaining player gets the maximum amount of points minus one. But every guess gives points, so it is effectively -2 instead of +1.
+        if((player == guessingPlayer || player == explainingPlayer) && m_isCorrectlyGuessed()){
+            points[player] -= 3; // Minus three points for a correct guess.
+        }
+        if(player != explainingPlayer){
+            int guessesMade = m_numberOfGuessesMade() + (guesserHasGuessedAlready ? 0 : 1);
+            int pointsForPlayer = guessesMade / guessersCount + (guessesMade % guessersCount >= static_cast<int>(guessingplayerIndex) ? 1 : 0); //This counts the number of guesses the player made
+            points[player] += pointsForPlayer;
+        }
+        if(player == explainingPlayer){
+            int pointsForExplainingPlayer = m_numberOfGuessesMade() / guessersCount + 1; //The idea is that the explaining player gets one extra point on top of the average guesses made by the guessers. If the guessers hit the correct word, he's already lost three points.
+            points[player] += pointsForExplainingPlayer;
+        }
+
+        ++playerIndex;
+
+    }
+    return points;
+}
+
+Round::RoundData::PlayerIndex Round::RoundData::m_indexOfPlayer(PlayerID player) const{
+    //First, find the explaining player.
+    if(player == explainingPlayer) return EXPLAINING_PLAYER;
+    auto it = std::find(players.begin(), players.end(), explainingPlayer);
+    auto it2 = std::find(players.begin(), players.end(), player);
+    if(it2 == players.end()) return INVALID_PLAYER_INDEX;
+    auto distance = std::distance(it, it2);
+    if(distance < 0){
+        return static_cast<PlayerIndex>(distance + players.size());
+    }
+    else // If the distance is non-negative, return it as the player index.
+        return static_cast<PlayerIndex>(distance);
 }

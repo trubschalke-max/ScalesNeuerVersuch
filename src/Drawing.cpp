@@ -93,9 +93,10 @@ ErrorCode Drawing::m_handleValidSuggestion(const Suggestor::Suggestion& suggesti
         ErrorCode rawEC;
         switch(object->m_HandlingMode()){
             case GameObject::HandlingMode::SUGGEST:
+            case GameObject::HandlingMode::DISPLAY_AND_APPLY:
                 if(object->m_isRelevant(suggestion))
                     rawEC = object->m_putIntoEffect(suggestion);
-                else rawEC = ErrorCode::NOTHING_HAPPENED;
+                else rawEC = object->m_updateDisplaying();
                 break;
             case GameObject::HandlingMode::DISPLAY_ONLY:
                 rawEC = object->m_updateDisplaying();

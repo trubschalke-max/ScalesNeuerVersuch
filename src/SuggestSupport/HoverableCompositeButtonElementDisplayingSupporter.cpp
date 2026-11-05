@@ -27,6 +27,9 @@ bool CompSupp::m_isRelevantForDisplaying(const SDL_Event& event){//This assumes 
 
 ErrorCode CompSupp::m_changeDisplayingDueTo(const SDL_Event& event){
     ErrorCode error = ErrorCode::NOTHING_HAPPENED; 
+    if(!m_element->m_showHoveredState()){
+        return error;
+    }
     for(auto& button: m_element->m_buttons){
         if(button->m_relevanceOf(event) == GameObject::RELEVANT_FOR_DISPLAYING){
             ErrorCode rawEC = button->m_changeDisplayingDueTo(event);

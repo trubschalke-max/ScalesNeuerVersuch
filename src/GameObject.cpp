@@ -23,6 +23,7 @@ ErrorCode GameObject::m_handleEvent(const SDL_Event& event){
                 return ErrorCode::NOTHING_HAPPENED;
             else return ErrorCode::OK;
         case DISPLAY_ONLY:
+        case DISPLAY_AND_APPLY:
             return m_changeDisplayingDueTo(event);
         case DO_NOTHING:
             return ErrorCode::NOTHING_HAPPENED;

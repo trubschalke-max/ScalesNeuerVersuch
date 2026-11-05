@@ -13,6 +13,7 @@
 #include "myExceptions.hpp"
 #include "GameObjectFactory.hpp"
 
+class GameDataGiver;
 
 class Player //This class manages its own window and event handling, as well as it contains some playerData info. The player is not supposed to implement much game logic. Picture it as both a player's board and their hand.
 {
@@ -21,6 +22,7 @@ class Player //This class manages its own window and event handling, as well as 
 public: struct PlayerData{
     ObjectData::PlayerID playerID;
     std::string playerName;
+    int points = 0;
 };
 private: 
     std::unique_ptr<Suggestor::Suggestion> m_currentSuggestion;
@@ -39,6 +41,8 @@ public:
     ErrorCode m_addRecipe(Recipe* recipe); //Creates an object based on a recipe, and adds it to the UI.
     void m_resetRoundBasedShiftsInUI(); //This is not clean code, I know. But I don't know how else to do that.
     ErrorCode m_prepareForNewRound(); //In the future, this could potentially have some graphic implications or whatever.
+    const auto m_Data() const { return m_data; }
+    friend class PlayerStateIndicatingElement;
 };
 
 #endif

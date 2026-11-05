@@ -6,7 +6,7 @@
 #include "GameObject.hpp"
 #include "HoverableButtonElement.hpp"
 
-class Scale; class ExplainableSet;
+class Scale; class ExplainableSet; class GameDataGiver; class Player;
 
 class GameObjectFactory{ //This shall be a singleton class.
 public: 
@@ -23,14 +23,20 @@ public:
         std::string text = "";
         GameObject::Layer layer = GameObject::DEFAULT_LAYER;
         ObjectData::Activeness activeness = ObjectData::Activeness::PASSIVE;
+        GameDataGiver* gameDataGiver;
+        GameObject::Longevity longevity = GameObject::ONE_ROUND_LONG;
+        GameObject::HandlingMode handlingMode = GameObject::HandlingMode::SUGGEST; 
+        Player* player = nullptr;
     };
     class InvalidRecipeException: public std::logic_error {
     public:
         InvalidRecipeException(const std::string& message) : std::logic_error(message) {}
     };
+private:
+    GameObject* m_createGameObjectRaw(const Recipe& recipe); //Creates a game object based on the provided recipe. 
 public:
+    GameObject* m_createGameObject(const Recipe& recipe); //Creates a game object based on the provided recipe, with additional checks and handling. 
 static GameObjectFactory* getInstance(); //Returns the singleton instance of the factory.
-GameObject* m_createGameObject(const Recipe& recipe); //Creates a game object based on the provided recipe. 
 private:
     GameObjectFactory();
     ~GameObjectFactory();

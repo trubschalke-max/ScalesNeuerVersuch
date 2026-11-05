@@ -6,7 +6,7 @@
 #include "HoverableButtonElement.hpp"
 #include "SuggestSupport/HoverableCompositeButtonElementDisplayingSupporter.hpp"
 
-class HoverableCompositeButtonElement: public GameObject //Currently, this is merely a helper class for the displaying support. 
+class HoverableCompositeButtonElement: public GameObject //Currently, this is merely a helper class for the displaying support. Important virtual methods: m_createButtons, m_showHoveredState, m_refreshButtonsActiveness
 {
 public:
     struct ColorSet{

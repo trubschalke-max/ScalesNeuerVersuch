@@ -149,7 +149,7 @@ bool ExplainableSetElement::m_isRelevant(const Suggestor::Suggestion& suggestion
             if(suggestion.explainables && !suggestion.explainables->empty())
                 return true;
             return false;
-        case Suggestor::Suggestion::Radicality::SELECTION_ONLY:
+        case Suggestor::Suggestion::Radicality::PARTIAL_CHANGE_ONLY:
             if(suggestion.selectedWordValue)
                 return true;
             return false;

@@ -24,6 +24,9 @@ ErrorCode Suggestor::Suggestion::m_validate() const{
     if(selectedWordValue){
         count++;
     }
+    if(pointsIncrease){
+        count++;
+    }
     if(count > 1){
         return ErrorCode::MULTIPLE_SUGGESTION_ITEMS_AT_ONCE;
     }
@@ -40,7 +43,7 @@ Suggestor::~Suggestor()
 
 }
 
-bool Suggestor::Suggestion::m_empty() const{return activeness.get() == nullptr && scaleData.get() == nullptr && explainables.get() == nullptr && selectedWordValue.get() == nullptr && buttonElement == nullptr && certainlyKnownError == ErrorCode::OK;}
+bool Suggestor::Suggestion::m_empty() const{return activeness.get() == nullptr && scaleData.get() == nullptr && explainables.get() == nullptr && selectedWordValue.get() == nullptr && buttonElement == nullptr && pointsIncrease == 0 &&certainlyKnownError == ErrorCode::OK;}
 
 Suggestor::Suggestion Suggestor::m_suggestFor(const SDL_Event& event){
     if(!m_isRelevantForSuggesting(event)){

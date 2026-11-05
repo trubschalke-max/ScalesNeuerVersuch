@@ -22,7 +22,7 @@ public:
     bool m_ExpectsSuggestion() const { return m_expectsSuggestion; }
     ErrorCode m_resetSuggestion(); //The main values are OK if there was one; and NOTHING_HAPPENED if there was none.
     ErrorCode m_handleValidSuggestion(const Suggestor::Suggestion& suggestion); //Redirects the suggestion to the drawing.
-    ErrorCode m_updateDisplaying(); //Updates the displaying of all contained game objects.
+    ErrorCode m_updateDisplaying();
 };
 
 #endif

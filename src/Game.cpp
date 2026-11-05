@@ -16,7 +16,7 @@ using ObjectData::ScaleValue;
 using ErrorHandling::checkForErrorStandardHierarchy;
 using ObjectData::PlayerID;
 
-Game::Game()
+Game::Game(): m_gameDataGiver(*this)
 {
     m_init();
 }
@@ -54,6 +54,10 @@ void Game::m_init(){
     if(m_gameData.error != ErrorCode::OK){
         std::cout<<"Init event handler fail: "<<toString(m_gameData.error)<<std::endl;
     }
+    checkForError(m_initPlayerUI(), m_gameData.error);
+    if(m_gameData.error != ErrorCode::OK){
+        std::cout<<"Init player UI fail: "<<toString(m_gameData.error)<<std::endl;
+    }
 }
 
 ErrorCode Game::m_simpleTest(){
@@ -68,9 +72,20 @@ ErrorCode Game::m_simpleTest(){
         m_suggestionQueue.push_front(std::make_unique<Suggestor::Suggestion>(Suggestor::Suggestion::None()));
         m_suggestionQueue.front()->scaleData = std::make_unique<ObjectData::ScaleData>(suggestion);
         m_suggestionQueue.front()->applicability = Suggestor::Suggestion::ApplicabilityType::ONCE;
-        m_suggestionQueue.front()->radicality = Suggestor::Suggestion::Radicality::SELECTION_ONLY;
+        m_suggestionQueue.front()->radicality = Suggestor::Suggestion::Radicality::PARTIAL_CHANGE_ONLY;
         m_suggestionQueue.front()->playerID = PlayerID::PLAYER_1;
     }
+    m_suggestionQueue.push_front(std::make_unique<Suggestor::Suggestion>(Suggestor::Suggestion::None()));
+    m_suggestionQueue.front()->applicability = Suggestor::Suggestion::ApplicabilityType::ONCE;
+    m_suggestionQueue.front()->radicality = Suggestor::Suggestion::Radicality::PARTIAL_CHANGE_ONLY;
+    m_suggestionQueue.front()->playerID = PlayerID::PLAYER_2;
+    m_suggestionQueue.front()->selectedWordValue = std::make_unique<ObjectData::ExplainableSetValue>(ObjectData::ExplainableSetValue::EXSET_13);
+     m_suggestionQueue.push_front(std::make_unique<Suggestor::Suggestion>(Suggestor::Suggestion::None()));
+    m_suggestionQueue.front()->applicability = Suggestor::Suggestion::ApplicabilityType::ONCE;
+    m_suggestionQueue.front()->radicality = Suggestor::Suggestion::Radicality::PARTIAL_CHANGE_ONLY;
+    m_suggestionQueue.front()->playerID = PlayerID::PLAYER_2;
+    m_suggestionQueue.front()->selectedWordValue = std::make_unique<ObjectData::ExplainableSetValue>(ObjectData::ExplainableSetValue::EXSET_14);
+
     try{
     ErrorCode error = ErrorCode::OK;
     //     Scale scale("above", "below", ScaleValue::SCALE_1);
@@ -91,9 +106,10 @@ ErrorCode Game::m_simpleTest(){
     //     return e.m_eventLoop();
     while(!m_gameData.lastRoundReached){
         if(m_currentRound){
-            checkForError(m_killRound(), m_gameData.error);
+            throw std::runtime_error("Current round exists when it should not.");
+            //checkForError(m_killRound(), m_gameData.error);
         }
-        checkForError(m_initializeRound(), m_gameData.error);
+        checkForError(m_initRound(), m_gameData.error);
         std::map<PlayerID, std::vector<GameObjectFactory::Recipe>> recipeContainer;
         checkForError(m_currentRound->m_createRoundElementRecipes(recipeContainer), m_gameData.error);
         for(auto& pair : recipeContainer){
@@ -109,8 +125,9 @@ ErrorCode Game::m_simpleTest(){
             std::cout<<"Play round fail: "<<toString(m_gameData.error)<<std::endl;
             break;
         }
-        checkForError(m_killRound(), m_gameData.error);
+            checkForError(m_killRound(), m_gameData.error);
     }
+
     ErrorCode killError = m_killGame();
     if(killError != ErrorCode::OK){
         std::cout<<"Kill game fail: "<<toString(killError)<<std::endl;
@@ -161,17 +178,18 @@ ErrorCode Game::m_playRound(){
     return ErrorCode::OK;
 }
 
-ErrorCode Game::m_initializeRound(){
+ErrorCode Game::m_initRound(){
     ErrorCode error = ErrorCode::OK;
     if(m_currentRound){
         return ErrorCode::OLD_ROUND_NOT_KILLED;
     }
     auto playerIDs = m_playerIDs();
-    m_currentRound = std::make_unique<Round>(m_currentPlayerID(), playerIDs, 3, 24);
+    m_currentRound = std::make_unique<Round>(m_gameData.roundHistory.size() + 1, m_currentPlayerID(), playerIDs, 3, 24);
     for(auto& player: m_playerList){
         checkForError(player->m_prepareForNewRound(), error);
     }
-    checkForError(m_currentRound->m_initializeRound(), error);
+    checkForError(m_currentRound->m_initRound(), error);
+    checkForError(m_eventHandler->m_updateDisplaying(), error);
     return error;
 }
 
@@ -180,9 +198,17 @@ ErrorCode Game::m_killRound(){
     if(!m_currentRound){
         return ErrorCode::NO_CURRENT_ROUND;
     }
-    checkForError(m_currentRound->m_shutdown(&m_players), error);
-    m_gameData.roundHistory.push_back(std::move(m_currentRound->m_roundData));
+    std::unique_ptr<Round::RoundData> dumpData;
+    checkForError(m_currentRound->m_shutdown(&m_players, dumpData), error); 
+    m_gameData.roundHistory.push_back(std::move(dumpData));
+    while(!m_currentRound->m_suggestionsLeftToHandle.empty()){
+        m_suggestionQueue.push_back(std::move(m_currentRound->m_suggestionsLeftToHandle.back()));
+        m_currentRound->m_suggestionsLeftToHandle.pop_back();
+    }
     m_currentRound.reset();
+    m_eventHandler->m_updateDisplaying();
+    //The round's suggestions will be migrated to the game's suggestion queue
+
     return ErrorCode::OK;
 }
 
@@ -268,9 +294,15 @@ ErrorCode Game::m_handleValidSuggestion(const Suggestor::Suggestion& suggestion)
         return ErrorCode::NO_CURRENT_ROUND;
     }
     ErrorCode error = m_eventHandler->m_handleValidSuggestion(suggestion);
+    if(error == ErrorCode::NOTHING_HAPPENED){
+        return error;
+    }
+    if(error == ErrorCode::MERELY_VISUAL_IMPLICATIONS){
+        error = ErrorCode::OK;
+    }
     checkForErrorStandardHierarchy(error, m_gameData.error);
-    ErrorCode updateError = m_eventHandler->m_updateDisplaying();
     checkForErrorStandardHierarchy(m_currentRound->m_reactToSuggestion(suggestion, error), m_gameData.error); 
+    ErrorCode updateError = m_eventHandler->m_updateDisplaying();
     return error;
 }
 
@@ -283,6 +315,16 @@ const Suggestor::Suggestion* Game::m_currentSuggestion(){
         m_suggestionQueue.pop_back();
         return sugg;
     }
+    //The round's suggestions need to be checked for too. Right now, suggestions don't have  priority. Maybe they should.
+    if(m_currentRound){
+        auto& roundSuggestions = m_currentRound->m_suggestionsLeftToHandle;
+        if(!roundSuggestions.empty()){
+            sugg = roundSuggestions.back().get();
+            std::swap(m_tmpSuggestion, roundSuggestions.back());
+            roundSuggestions.pop_back();
+            return sugg;
+        }
+    }
     ErrorCode resetError = m_eventHandler->m_resetSuggestion();
     if(resetError != ErrorCode::OK && resetError != ErrorCode::NOTHING_HAPPENED){// I'm not sure if, other than for the first iteration, NOTHING_HAPPENED should occur though.
         checkForErrorStandardHierarchy(resetError, m_gameData.error);
@@ -291,3 +333,23 @@ const Suggestor::Suggestion* Game::m_currentSuggestion(){
     return m_eventHandler->m_retrieveSuggestion();
 }
 
+ErrorCode Game::m_initPlayerUI(){
+    for(auto& player : m_playerList){
+        if(player){
+            GameObjectFactory::Recipe recipe;
+            recipe.handlingMode = GameObject::HandlingMode::DISPLAY_AND_APPLY;
+            recipe.longevity = GameObject::Longevity::PERMANENT;
+            recipe.gameDataGiver = &m_gameDataGiver;
+            recipe.player = player.get();
+            recipe.type = GameObjectFactory::GameObjectType::PLAYER_STATE_INDICATING_ELEMENT;
+            player->m_addRecipe(&recipe);
+        }
+    }
+    return ErrorCode::OK;
+}
+
+const Round::RoundData& Game::m_RoundData() const{
+    if(!m_currentRound)
+        throw std::runtime_error("No current round available!");
+    return m_currentRound->m_RoundData();
+}

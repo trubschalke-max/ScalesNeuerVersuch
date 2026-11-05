@@ -32,7 +32,7 @@ namespace ObjectData{
         ObjectData::WordState state;
     };
     enum class PlayerID{PLAYER_0 = 0, PLAYER_1 = 1, PLAYER_2 = 2, PLAYER_3 = 3, PLAYER_4 = 4, PLAYER_NONE = -1, DUMMY_PLAYER = -2};
-    enum class GameObjectType{SCALE_ELEMENT, EXPLAINABLE_SET_ELEMENT, CLASSIC_UNHOVERABLE_BUTTON, HOVERABLE_BUTTON};
+    enum class GameObjectType{SCALE_ELEMENT, EXPLAINABLE_SET_ELEMENT, CLASSIC_UNHOVERABLE_BUTTON, HOVERABLE_BUTTON, PLAYER_STATE_INDICATING_ELEMENT};
 
 }
 std::string toString(ObjectData::Activeness ac);

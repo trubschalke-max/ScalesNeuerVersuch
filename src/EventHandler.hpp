@@ -19,7 +19,7 @@ public:
     
     protected:
     DrawingObject* m_whatToDraw;
-    Uint32 m_delayBetweenIterations = 100;
+    Uint32 m_delayBetweenIterations = 10;
     
     virtual HandlingResult m_handleRelevantEvent(const SDL_Event& event, HandlingClass diagnosis) = 0;
     virtual HandlingClass m_classify(const SDL_Event& event); //For preprocessing. The default behavior is to mark everything as unspecified.

@@ -18,7 +18,6 @@ ScaleElement::ScaleElement(ObjectData::PlayerID playerID, int x, int y, Scale* s
         throw std::runtime_error("Unable to create buttons for scale!");
     }
     m_suggestor = std::make_unique<ScaleElementSuggestor>(this);
-    m_colors = s_standardColors();
 }
 
 ScaleElement::~ScaleElement()
@@ -253,7 +252,7 @@ bool ScaleElement::m_isRelevant(const Suggestor::Suggestion& suggestion){
         return false;
     }
 
-    if(suggestion.radicality == Suggestor::Suggestion::Radicality::SELECTION_ONLY){
+    if(suggestion.radicality == Suggestor::Suggestion::Radicality::PARTIAL_CHANGE_ONLY){
         return suggestion.scaleData->coincidesWith(m_associatedScale->m_Data(), false);
     }
 

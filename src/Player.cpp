@@ -1,7 +1,7 @@
 #include "Player.hpp"
 #include <algorithm>
 
-Player::Player(ObjectData::PlayerID playerID, const std::string playerName): m_data{playerID, playerName}
+Player::Player(ObjectData::PlayerID playerID, const std::string playerName):m_data{playerID, playerName}
 {
     m_playerUI = std::make_unique<PlayerUI>(playerName, this);
 }

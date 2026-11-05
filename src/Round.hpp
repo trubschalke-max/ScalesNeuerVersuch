@@ -9,6 +9,7 @@
 #include <vector>
 #include <iostream>
 #include "GameObjectFactory.hpp"
+#include <list>
 
 class Player;
 
@@ -24,6 +25,9 @@ class Round
 public:
     typedef std::map<PlayerID, std::vector<Recipe>> RecipeListing;
     struct RoundData{
+        enum PlayerIndex{EXPLAINING_PLAYER = 0, FIRST_GUESSING_PLAYER = 1, INVALID_PLAYER_INDEX = -1};
+        enum Number{INVALID_ROUND_NUMBER = -1};
+        short int roundNumber = INVALID_ROUND_NUMBER;
         PlayerID explainingPlayer = PlayerID::DUMMY_PLAYER;
         PlayerID guessingPlayer = PlayerID::DUMMY_PLAYER;
         std::unique_ptr<ExplainableSet> explainableSet = nullptr; //Neatly, when these go into history, all the selected explainables and scale values are preserved.
@@ -34,10 +38,13 @@ public:
         RoundData(RoundData&&) = default;
         RoundData() = default;
         std::vector<PlayerID> players;
+        std::map<PlayerID, int> m_determinePoints(bool guesserHasGuessedAlready = true) const; //This function returns the points each player earned.
         bool m_areAllScalesCommitted() const;
+        PlayerIndex m_indexOfPlayer(PlayerID player) const; //This function returns the index of the given player in the round, or INVALID_PLAYER_INDEX if the player is not part of the round.
     };
 private:
     std::unique_ptr<RoundData> m_roundData;
+    std::list<std::unique_ptr<Suggestor::Suggestion>> m_suggestionsLeftToHandle; //This is a queue. Suggestions will be handled in the order they are received.
     unsigned short int m_scalesCount; //Depending on how I will make the rules, this might be wildly oversimplified. It is only relevant until the scales are actually created.
     unsigned short int m_explainablesCount; //Depending on how I will make the rules, this might be wildly oversimplified. It is only relevant until the explainable set is actually created.
     unsigned short int m_scaleMaxValue; //The size of each scale, relevant until the scales are actually created. Note that scale.maxValue - scale.minValue should equal m_scaleMaxValue-1.
@@ -57,15 +64,15 @@ private:
     ErrorCode m_reactToScaleModification(const Suggestor::Suggestion& suggestion); //This function will react specifically to scale modification suggestions. With the rules currently intended, nothing will happen.
 
 public:
-    Round(PlayerID explainingPlayer, const std::vector<PlayerID>& players, unsigned short int scalesCount, unsigned short int explainablesCount, unsigned short int scaleMaxValue = (int) ScaleValue::SCALE_CANONICAL_END); //The scaleSize parameter 
+    Round(int nr, PlayerID explainingPlayer, const std::vector<PlayerID>& players, unsigned short int scalesCount, unsigned short int explainablesCount, unsigned short int scaleMaxValue = (int) ScaleValue::SCALE_CANONICAL_END); //The scaleSize parameter 
     ~Round();
     const RoundData& m_RoundData() { return *m_roundData; } 
-    ErrorCode m_initializeRound(); // This creates the explainable set and scales for the round. It does NOT create the players' game objects.
+    ErrorCode m_initRound(); // This creates the explainable set and scales for the round. It does NOT create the players' game objects.
     ErrorCode m_validate(const Suggestor::Suggestion&); //If the suggestion is valid, returns ErrorCode::OK, if it means nothing, it returns ErrorCode::IGNORE_THIS, otherwise returns an appropriate error code.
     bool m_isRoundFinished(); // I guess that this will return true on the correct explainable being selected. Right now, it will always return false.
     ErrorCode m_confirmReadiness(); //This function confirms the readiness of all scales and explainable sets associated with the round - in theory. In practice, I will merely set the readiness flags of the scales to true.
     ErrorCode m_reactToSuggestion(const Suggestor::Suggestion& suggestion, ErrorCode handlingResult = ErrorCode::OK); //This function will react to a suggestion, updating the round's state accordingly. The acceptable handlingResult values are ErrorCode::OK and ErrorCode::NOTHING_HAPPENED. I don't know if, in the future, there might be MERELY_VISUAL_IMPLICATIONS as well.
-    ErrorCode m_shutdown(std::map<ObjectData::PlayerID, Player*>* m_players); //This function will clean up the current round, moving its data into the round history and resetting the current round pointer. It needs the actual players to properly reset the round.
+    ErrorCode m_shutdown(std::map<ObjectData::PlayerID, Player*>* m_players, std::unique_ptr<RoundData>& dumpData); //This function will clean up the current round, moving its data into the round history and resetting the current round pointer. It needs the actual players to properly reset the round. The dumpData parameter is used to store the round's data before resetting the member variable.
 
     friend class Game; //The game needs to std::move RoundData into the round history.
 

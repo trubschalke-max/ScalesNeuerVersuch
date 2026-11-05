@@ -11,4 +11,5 @@ The suggesting-retrieving engine works
 I did not try to apply the suggestions if they are valid
 The coloring of button elements is questionable and everything is sluggish. I don't know why.
 Challenge for handling suggestions: Multiple scale elements/explainablesetelements need to apply a suggestion to their buttons, but only once to the scale/explainableset.
-Note to myself: It might be best to 
+Show points now!
+Make points now!

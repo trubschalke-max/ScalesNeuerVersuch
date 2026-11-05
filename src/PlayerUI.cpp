@@ -4,6 +4,7 @@
 #include "Player.hpp"
 #include "ScaleElement.hpp"
 #include "ExplainableSetElement.hpp"
+#include "PlayerStateIndicatingElement.hpp"
 
 PlayerUI::PlayerUI(std::string playerName, Player* player): m_playerName(playerName), m_associatedWindow(playerName), m_associatedDrawing(nullptr), m_associatedPlayer(player)
 {
@@ -25,6 +26,7 @@ PlayerUI::~PlayerUI()
 SDL_Point PlayerUI::m_figureOutPosition(GameObject* obj, ObjectData::GameObjectType type, bool remember){
     SDL_Point position = {0, 0};
     ScaleElement* scaleElement;
+    PlayerStateIndicatingElement* playerStateIndicatingElement;
     switch(type){
         case ObjectData::GameObjectType::SCALE_ELEMENT:
          scaleElement = dynamic_cast<ScaleElement*>(obj);
@@ -39,6 +41,17 @@ SDL_Point PlayerUI::m_figureOutPosition(GameObject* obj, ObjectData::GameObjectT
             // Example logic: position explainable set element below
             position.x = 0; 
             position.y = 450; 
+            break;
+        case ObjectData::GameObjectType::PLAYER_STATE_INDICATING_ELEMENT:
+            playerStateIndicatingElement = dynamic_cast<PlayerStateIndicatingElement*>(obj);
+            if(!playerStateIndicatingElement)
+                throw std::invalid_argument("Failed to cast GameObject to PlayerStateIndicatingElement.");
+            // Example logic: position player state indicating element at the top right corner
+            position.x = Window::SCREEN_WIDTH - 300;
+            if(m_nextScaleElementX > position.x){//I coul also use some kind of isHitBy check
+                position.y = 450;
+            }
+            position.y = 0;
             break;
         default:
             throw std::invalid_argument("Unknown or not supported GameObjectType");
