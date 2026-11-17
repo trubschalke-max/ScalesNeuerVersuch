@@ -21,8 +21,8 @@ class ButtonElement: public GameObject
 
     static SDL_Color s_errorColor(){return Graphics::errorColor();}
 public:
-    ButtonElement(int x, int y, int width, int height, std::string text, GameObject::Layer layer = DEFAULT_LAYER, ObjectData::Activeness activeness = ObjectData::Activeness::PASSIVE);
-    ButtonElement(SDL_Rect shapeAndPlace, std::string text, GameObject::Layer layer = DEFAULT_LAYER, ObjectData::Activeness activeness = ObjectData::Activeness::PASSIVE);
+    ButtonElement(ObjectData::PlayerID playerID, int x, int y, int width, int height, std::string text, GameObject::Layer layer = DEFAULT_LAYER, ObjectData::Activeness activeness = ObjectData::Activeness::PASSIVE);
+    ButtonElement(ObjectData::PlayerID playerID, SDL_Rect shapeAndPlace, std::string text, GameObject::Layer layer = DEFAULT_LAYER, ObjectData::Activeness activeness = ObjectData::Activeness::PASSIVE);
     ButtonElement(ButtonElement&&) = default;
     virtual ~ButtonElement();
     virtual ErrorCode m_draw(SDL_Renderer* renderer) override;

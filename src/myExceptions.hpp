@@ -35,5 +35,12 @@ class QuitSurface: public std::runtime_error{
 public: QuitSurface():std::runtime_error("QuitSurface"){}
 };
 
+class UnsupportedSDLEvent: public std::exception{
+public:
+	SDL_Event m_event;
+	UnsupportedSDLEvent(const SDL_Event& event): m_event(event){}
+	const char* what() const noexcept{return ("Unsupported SDL event: type = " + std::to_string(m_event.type)).c_str(); }
+};
+
 
 #endif

@@ -5,11 +5,13 @@
 #define BaseButton ClassicUnhoverableButtonElement
 using ObjectData::Activeness;
 
-ScaleLike::ScaleLike(int x, int y, int width, int height, std::string text, SDL_Color backgroundColorWhenActive, SDL_Color backgroundColorWhenPassive, SDL_Color textColor, ColorSetExtension furtherColors, GameObject::Layer layer,ObjectData::Activeness activeness): BaseButton(x, y, width, height, text, BaseButton::ColorSet{backgroundColorWhenActive, backgroundColorWhenPassive, textColor}, layer, activeness), m_furtherColors(furtherColors) 
-{m_displayingSupporter = std::make_unique<HoverableButtonElementDisplayingSupporter>(this);}
-ScaleLike::ScaleLike(int x, int y, int width, int height, std::string text,  ColorSet colors, ColorSetExtension furtherColors, GameObject::Layer layer,ObjectData::Activeness activeness): ScaleLike(x, y, width, height, text, colors.backgroundColorWhenActive, colors.backgroundColorWhenPassive, colors.textColor, furtherColors, layer, activeness){}
+ScaleLike::ScaleLike(ObjectData::PlayerID playerID, int x, int y, int width, int height, std::string text, SDL_Color backgroundColorWhenActive, SDL_Color backgroundColorWhenPassive, SDL_Color textColor, ColorSetExtension furtherColors, GameObject::Layer layer,ObjectData::Activeness activeness): BaseButton(playerID, x, y, width, height, text, BaseButton::ColorSet{backgroundColorWhenActive, backgroundColorWhenPassive, textColor}, layer, activeness), m_furtherColors(furtherColors) 
+{
+    m_displayingSupporter = std::make_unique<HoverableButtonElementDisplayingSupporter>(this);
+}
+ScaleLike::ScaleLike(ObjectData::PlayerID playerID, int x, int y, int width, int height, std::string text,  ColorSet colors, ColorSetExtension furtherColors, GameObject::Layer layer,ObjectData::Activeness activeness): ScaleLike(playerID, x, y, width, height, text, colors.backgroundColorWhenActive, colors.backgroundColorWhenPassive, colors.textColor, furtherColors, layer, activeness){}
 
-ScaleLike::ScaleLike(SDL_Rect shapeAndPlace, std::string text, ColorSet colors, ColorSetExtension furtherColors, GameObject::Layer layer,ObjectData::Activeness activeness): ScaleLike(shapeAndPlace.x, shapeAndPlace.y, shapeAndPlace.w, shapeAndPlace.h, text, colors.backgroundColorWhenActive, colors.backgroundColorWhenPassive, colors.textColor, furtherColors, layer, activeness){}
+ScaleLike::ScaleLike(ObjectData::PlayerID playerID, SDL_Rect shapeAndPlace, std::string text, ColorSet colors, ColorSetExtension furtherColors, GameObject::Layer layer,ObjectData::Activeness activeness): ScaleLike(playerID, shapeAndPlace.x, shapeAndPlace.y, shapeAndPlace.w, shapeAndPlace.h, text, colors.backgroundColorWhenActive, colors.backgroundColorWhenPassive, colors.textColor, furtherColors, layer, activeness){}
 
 ScaleLike::~ScaleLike()
 {
@@ -25,7 +27,15 @@ SDL_Color ScaleLike::m_currentBackgroundColor(){
         return m_furtherColors.m_backgroundColorWhenForbidden;
     if(m_activeness == Activeness::PERMANENTLY_SELECTED)
         return m_furtherColors.m_colorWhenPermanentlyActive;
-    if(m_activeness == Activeness::ACTIVENESS_ERROR)
+    if((m_activeness & Activeness::ACTIVENESS_ERROR) != Activeness::ZERO)
         return s_errorColor();
+    if(m_activeness == Activeness::SECRETLY_ACTIVE)
+        return m_furtherColors.m_colorWhenSecretlyActive;
+    if(m_activeness == Activeness::SECRETLY_PASSIVE)
+        return m_furtherColors.m_colorWhenSecretlyPassive;
+    if(m_activeness == Activeness::PASSIVE)
+        return m_colors.backgroundColorWhenPassive;
+    if((m_activeness & Activeness::LOST) != Activeness::ZERO)
+        return m_furtherColors.m_colorWhenLost;
     else return BaseButton::m_currentBackgroundColor();
 }

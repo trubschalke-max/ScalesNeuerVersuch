@@ -4,13 +4,13 @@
 
 typedef EventHandler::HandlingClass HC;
 
-EventHandler::EventHandler(Drawing* whatToDraw): m_whatToDraw(whatToDraw){}
+EventHandler::EventHandler(DrawingObject* whatToDraw): m_whatToDraw(whatToDraw){}
 EventHandler::~EventHandler(){}
-Displayer::Displayer(Drawing* whatToDraw): EventHandler(whatToDraw){if(!whatToDraw) throw std::runtime_error("Displayer constructed without a drawing");}
+Displayer::Displayer(DrawingObject* whatToDraw): EventHandler(whatToDraw){if(!whatToDraw) throw std::runtime_error("Displayer constructed without a drawing");}
 Displayer::~Displayer(){}
 
 bool EventHandler::m_isQuit(const SDL_Event& event){
-    if(event.type == SDL_QUIT)
+    if(event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE)
         return true;
     return false;
 }
@@ -19,7 +19,7 @@ ErrorCode EventHandler::m_enter(){
     ErrorCode whatToReturn = ErrorCode::OK;
     if(m_whatToDraw){
         checkForError(m_whatToDraw->m_draw(), whatToReturn);
-        SDL_RenderPresent(m_whatToDraw->m_Renderer());
+        checkForError(m_whatToDraw->m_renderPresent(), whatToReturn);
     }
     return whatToReturn;
 }
@@ -45,41 +45,40 @@ try{
                      HandlingResult result = HandlingResult::NO_RESULT_YET;
                     result = m_handleRelevantEvent(event, diagnosis);
                     ErrorHandling::checkForErrorStandardHierarchy(m_handleResult(result), error);
-                    switch(result){
-                        case HandlingResult::QUIT_FROM_SDL: throw SDLQuitException();
-                        case HandlingResult::QUIT_LOOP: 
-                            quit = true;
-                        case HandlingResult::FAILURE: 
-                            std::cerr<<"Something went wrong handling an event"<<std::endl;
-                            throw std::runtime_error("Something went wrong handling an event");
-                        default: 
-                            break;
-                        }
+                    if((result & HandlingResult::FAILURE) != HandlingResult::VOID){
+                        std::cerr<<"Something went wrong handling an event"<<std::endl;
+                        throw std::runtime_error("Something went wrong handling an event");
+                    }
+                    if((result & HandlingResult::QUIT_FROM_SDL) != HandlingResult::VOID){
+                        throw SDLQuitException();
+                    }
+                    if((result & HandlingResult::QUIT_LOOP) != HandlingResult::VOID){
+                        quit = true;
                     }
                 }
             }
-            SDL_Delay(m_delayBetweenIterations); //This reduces energy consumption
+            if(!quit){
+                SDL_Delay(m_delayBetweenIterations); //This reduces energy consumption
+            }
         }
         return error;
     }
+}
     catch(SDLQuitException){
         throw;
     }
 }
     
-    ErrorCode EventHandler::m_handleResult(EventHandler::HandlingResult result){
-        ErrorCode error = ErrorCode::OK;
-        switch(result){
-            case HandlingResult::REDRAW:
-            if(!m_whatToDraw){
-                return ErrorCode::NULL_DRAWING_IN_EVENT_HANDLER;
-            }
-            checkForError(m_whatToDraw->m_draw(), error);
-            SDL_RenderPresent(m_whatToDraw->m_Renderer());
-            return error;
-        default:
-            return ErrorCode::OK; 
+ErrorCode EventHandler::m_handleResult(EventHandler::HandlingResult result){
+    ErrorCode error = ErrorCode::OK;
+    if((int) result & (int) HandlingResult::REDRAW){
+        if(!m_whatToDraw){
+            return ErrorCode::NULL_DRAWING_IN_EVENT_HANDLER;
+        }
+        checkForError(m_whatToDraw->m_draw(), error);
+        checkForError(m_whatToDraw->m_renderPresent(), error);
     }
+    return error;
 }
 
 HC EventHandler::m_classify(const SDL_Event& event){

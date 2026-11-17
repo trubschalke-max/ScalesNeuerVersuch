@@ -4,7 +4,7 @@ using ObjectData::ScaleData;
 using ObjectData::ScaleValue;
 using ObjectData::State;
 
-ScaleElementSuggestor::ScaleElementSuggestor(ScaleElement* element): Suggestor(element), m_scaleElement(element)
+ScaleElementSuggestor::ScaleElementSuggestor(ScaleElement* element): HoverableCompositeButtonElementSuggestor(element), m_scaleElement(element)
 {
 
 }
@@ -14,17 +14,6 @@ ScaleElementSuggestor::~ScaleElementSuggestor()
 
 }
 
-bool ScaleElementSuggestor::m_isRelevantForSuggesting(const SDL_Event& event){
-    if(event.type != SDL_MOUSEBUTTONDOWN){
-        return false;
-    }
-    if(!m_scaleElement->m_isHitBy(event.button.x, event.button.y)){
-        return false;
-    }
-    if(event.button.button != SDL_BUTTON_LEFT)
-        return false;
-    return true; //Right now, the scale element does not know if it is allowed to actually alter the scale data. Don't overestimate the meaning of a suggestion.
-}
 
 Suggestor::Suggestion ScaleElementSuggestor::m_suggestForRelevantEvent(const SDL_Event& event){
     Suggestion toSuggest;
@@ -37,6 +26,10 @@ Suggestor::Suggestion ScaleElementSuggestor::m_suggestForRelevantEvent(const SDL
     if(event.button.button != SDL_BUTTON_LEFT){
         return toSuggest;
     }
+    if(m_scaleElement->m_associatedScale == nullptr)
+        throw std::logic_error("Weird error: A ScaleElementSuggestor suggests something for a scale element with no associated scale");
+    if(m_scaleElement->m_associatedScale->m_Data().state == State::NOT_READY)
+        throw std::logic_error("Weird error: A ScaleElementSuggestor suggests something for a scale element that is not ready");
     if(m_scaleElement->m_associatedScale->m_Data().state != State::NOT_YET_COMMITTED)
         return toSuggest;
     ScaleData data = m_scaleElement->m_associatedScale->m_Data();
@@ -56,5 +49,7 @@ Suggestor::Suggestion ScaleElementSuggestor::m_suggestForSelection(ScaleData old
     if(scale->m_contains(selection)){
         newData.selection = selection;
     }
-    return Suggestion{nullptr, std::make_unique<ObjectData::ScaleData>(newData)};
+    Suggestion whatToReturn;
+    whatToReturn.scaleData = std::make_unique<ObjectData::ScaleData>(newData);
+    return whatToReturn;
 }

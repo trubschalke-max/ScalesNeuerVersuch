@@ -23,8 +23,7 @@ Window::Window(std::string name, unsigned int width, unsigned int height)
 ErrorCode Window::m_init()
 {
 	m_window = SDL_CreateWindow(m_name.c_str(), SDL_WINDOWPOS_UNDEFINED
-			  , SDL_WINDOWPOS_UNDEFINED
-			  , m_width, m_height, SDL_WINDOW_SHOWN );
+			  , SDL_WINDOWPOS_UNDEFINED, m_width, m_height, SDL_WINDOW_SHOWN);
 	m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
 	if(m_window == nullptr){
 		return ErrorCode::FAILURE;

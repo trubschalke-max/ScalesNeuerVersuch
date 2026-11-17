@@ -28,6 +28,8 @@ ErrorCode Supp::m_changeDisplayingDueTo(const SDL_Event& event){
 }
 
 bool Supp::m_isRelevantForDisplaying(const SDL_Event& event){
+    if(event.type != SDL_MOUSEMOTION) //Of course, I could create derived classes that, e.g., react to right clicks.
+        return false;
     if(event.type == SDL_MOUSEMOTION){//SDL_MOUSEMOTION = 1024
         if((int)(m_button->m_Activeness()) & (int)Activeness::FORBIDDEN == (int)Activeness::FORBIDDEN){
             return false;
@@ -35,3 +37,4 @@ bool Supp::m_isRelevantForDisplaying(const SDL_Event& event){
     }
     return true;
 }
+

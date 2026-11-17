@@ -8,7 +8,8 @@
 #include "Game.hpp"
 
 int main(int argv, char** args)
-{
-   Game game;
+{//Note to myself: A lot of invalid suggestions shall be treated like IGNORE_THIS.
+//Second note to myself: When initializing the round, pass the game objects to the players (and create them)
+    Game game;
     return (int) game.m_simpleTest();
 }
