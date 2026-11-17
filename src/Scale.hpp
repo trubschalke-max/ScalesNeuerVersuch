@@ -18,7 +18,7 @@ private:
     Scale(std::string above, std::string below, ObjectData::ScaleValue selection = ObjectData::ScaleValue::SCALE_NO_VALUE);
     Scale(const ObjectData::ScaleData& data);
     virtual ~Scale();
-    const ObjectData::ScaleData& m_Data(){return m_data;}
+    const ObjectData::ScaleData& m_Data() const{return m_data;}
     
     ErrorCode m_select(ObjectData::ScaleValue newValue); 
     ErrorCode m_commit(); //This will make the current selection final. Most notably, the state will be set to COMMITTED. In case it was committed already, it returns ALREADY_COMMITTED. In case nothing was selected, it returns INVALID_COMMIT. If state was ERROR  before, FAILURE is returned.

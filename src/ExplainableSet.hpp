@@ -8,6 +8,11 @@
 #include "myExceptions.hpp"
 
 class ExplainableSet{
+public: struct ExplainableSetDataRecipe{
+    unsigned int wordCount;
+    unsigned int correctCount;
+    enum class Topic{PEOPLE, CONCEPTS}; 
+};
 private:
     std::vector<ObjectData::Explainable> m_explainables;
     std::vector<ObjectData::ExplainableSetValue> m_correctValues(); 
@@ -29,5 +34,8 @@ struct MultipleCorrectWords: public std::exception{
     const char* what() const noexcept override;
     std::vector<ObjectData::ExplainableSetValue> m_correctWords;
 };
+
+std::string to_string(ExplainableSet::ExplainableSetDataRecipe::Topic topic);
+
 
 #endif

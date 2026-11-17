@@ -10,6 +10,7 @@
 #include <iostream>
 #include "GameObjectFactory.hpp"
 #include <list>
+#include "ScaleSet.hpp"
 
 class Player;
 
@@ -31,7 +32,7 @@ public:
         PlayerID explainingPlayer = PlayerID::DUMMY_PLAYER;
         PlayerID guessingPlayer = PlayerID::DUMMY_PLAYER;
         std::unique_ptr<ExplainableSet> explainableSet = nullptr; //Neatly, when these go into history, all the selected explainables and scale values are preserved.
-        std::vector<std::unique_ptr<Scale>> scales;
+        std::unique_ptr<ScaleSet> scaleSet;
         int guessesAllowed = 12; //This is a magic number right now. I don't really have a proper rationale for it yet.
         int m_numberOfGuessesMade() const; //This function returns the number of guesses made so far.
         bool m_isCorrectlyGuessed() const; //This function returns true if the correct value has been guessed, false otherwise.
@@ -41,6 +42,7 @@ public:
         std::map<PlayerID, int> m_determinePoints(bool guesserHasGuessedAlready = true) const; //This function returns the points each player earned.
         bool m_areAllScalesCommitted() const;
         PlayerIndex m_indexOfPlayer(PlayerID player) const; //This function returns the index of the given player in the round, or INVALID_PLAYER_INDEX if the player is not part of the round.
+        const std::vector<Scale*>& m_getRawScales() const { return scaleSet->getRawScales(); }
     };
 private:
     std::unique_ptr<RoundData> m_roundData;

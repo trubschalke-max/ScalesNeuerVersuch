@@ -120,3 +120,11 @@ int ExplainableSet::m_numberOfGuesses(){
     }
     return count;
 }
+
+std::string to_string(ExplainableSet::ExplainableSetDataRecipe::Topic topic){
+    switch(topic){
+        case ExplainableSet::ExplainableSetDataRecipe::Topic::PEOPLE: return "PEOPLE";
+        case ExplainableSet::ExplainableSetDataRecipe::Topic::CONCEPTS: return "CONCEPTS";
+        default: return "UNKNOWN";
+    }
+}

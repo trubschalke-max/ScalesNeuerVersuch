@@ -8,7 +8,7 @@
 namespace ObjectData{
  enum class State{ZERO = 0, COMMITTED = 1, NOT_YET_COMMITTED = 0, NOT_READY = 2, ERROR = 4}; 
     enum class ScaleValue{SCALE_COMMIT = -1, SCALE_UNDO = -2, SCALE_NO_VALUE = -3, SCALE_0 = 0, SCALE_1, SCALE_2, SCALE_3, SCALE_4, SCALE_CANONICAL_END = 4,
-    NOT_CLICKED = -4, CLICKING_CONFLICT = -5, DUMMY_VALUE = -6
+    NOT_CLICKED = -4, CLICKING_CONFLICT = -5, DUMMY_VALUE = -6, SCALE_CANONICAL_START = 0
     }; //One tile below the scale, there's an undo button. Two tiles below, there's a commit button.
     struct ScaleData{
         std::string above;

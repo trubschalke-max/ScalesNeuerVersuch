@@ -12,6 +12,7 @@
 #include "BasicGameObjectHandler.hpp"
 #include "GameData.hpp"
 #include "GameDataGiver.hpp"
+#include "GuessingDataCreator.hpp"
 
 
 #pragma once
@@ -23,6 +24,7 @@ public:
 private:
 
     GameDataGiver m_gameDataGiver;
+    std::unique_ptr<GuessingDataCreator> m_guessingDataCreator;
     std::list<std::unique_ptr<Suggestor::Suggestion>> m_suggestionQueue;
     std::unique_ptr<Suggestor::Suggestion> m_tmpSuggestion = nullptr;
 

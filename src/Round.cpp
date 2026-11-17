@@ -50,14 +50,7 @@ std::vector<ObjectData::ScaleData> Round::m_generateScaleData(){//For now, a tem
 }
 
 ErrorCode Round::m_initRound(){
-    auto explainableWords = m_generateExplainableWords();
-    auto scaleData = m_generateScaleData();
-    unsigned short int correctExplainableValue = m_generateCorrectExplainableValue();
-    m_roundData->explainableSet = std::make_unique<ExplainableSet>(explainableWords, (ExplainableSetValue) correctExplainableValue);
-    for(unsigned short int i = 0; i < m_scalesCount; ++i){
-        //Make a scale out of the scale data
-        m_roundData->scales.push_back(std::make_unique<Scale>(scaleData[i]));
-    }   
+    throw std::runtime_error("Round initialization not implemented yet.");
     return ErrorCode::OK;
 }
 
@@ -71,7 +64,8 @@ unsigned short int Round::m_generateCorrectExplainableValue(){
 
 ErrorCode Round::m_validate(const Suggestor::Suggestion& suggestion){
     //This is not all. But I will implement the short version: Scale selections from the explaining player, word selections from the other players. The first check will be if the suggestion is not trivially invalid, i.e. its own validate method returns an error.
-        ErrorCode error = ErrorCode::OK;
+    ErrorCode error = ErrorCode::OK;
+    auto scales = m_roundData->m_getRawScales();
     checkForError(m_sanityCheck(), error);
 
     checkForError(suggestion.m_validate(), error);
@@ -80,7 +74,7 @@ ErrorCode Round::m_validate(const Suggestor::Suggestion& suggestion){
     }
 
     if(suggestion.scaleData){
-        if(std::find_if(m_roundData->scales.begin(), m_roundData->scales.end(), [&suggestion](const std::unique_ptr<Scale>& sd){ return sd->m_Data().coincidesWith(*suggestion.scaleData, false); }) == m_roundData->scales.end()){//The scale data must belong to a scale that actually exists
+        if(std::find_if(scales.begin(), scales.end(), [&suggestion](const Scale* sd){ return sd->m_Data().coincidesWith(*suggestion.scaleData, false); }) == scales.end()){//The scale data must belong to a scale that actually exists
             return ErrorCode::WEIRD_SCALE_DATA; //This is a little oversimplified.
         }
         if(suggestion.scaleData->state == ObjectData::State::COMMITTED){
@@ -149,6 +143,7 @@ Round::PlayerID Round::m_firstPlayerAfter(PlayerID player, PlayerID excludingPla
 }
 
 bool Round::RoundData::m_areAllScalesCommitted() const{
+    auto scales = m_getRawScales();
     for(const auto& scale : scales){
         if((scale->m_Data().state != ObjectData::State::COMMITTED)){
             return false;
@@ -177,8 +172,9 @@ ErrorCode Round::m_createRoundElementRecipes(RecipeListing& recipes){
 ErrorCode Round::m_createRoundElementRecipesForPlayer(PlayerID player, std::vector<Recipe>& recipes){
     // I need a count of ScaleElements and one ExplainableSetElement. Right now, that's it.
     ErrorCode error;
-    for(auto& scaleElement : m_roundData->scales){
-        error = m_addScaleElementRecipeForPlayer(player, scaleElement.get(), recipes);
+    auto scales = m_roundData->m_getRawScales();
+    for(auto& scaleElement : scales){
+        error = m_addScaleElementRecipeForPlayer(player, scaleElement, recipes);
         checkForError(error, error);
     }
 
@@ -207,7 +203,8 @@ ErrorCode Round::m_addExplainableSetElementRecipeForPlayer(PlayerID player, Expl
 }
 
 ErrorCode Round::m_confirmReadiness(){
-    for(auto& scale : m_roundData->scales){
+    auto& scales = m_roundData->m_getRawScales();
+    for(auto& scale : scales){
         scale->m_setState(ObjectData::State::NOT_YET_COMMITTED);
     }
     if(!m_roundData->explainableSet){
@@ -223,7 +220,8 @@ ErrorCode Round::m_sanityCheck(){
     if(!m_roundData->explainableSet){
         return ErrorCode::NO_EXPLAINABLE_SET;
     }
-    if(m_roundData->scales.empty()){
+    auto& scales = m_roundData->m_getRawScales();
+    if(scales.empty()){
         return ErrorCode::NO_SCALES_AVAILABLE;
     }
     if(m_roundData->explainingPlayer == PlayerID::DUMMY_PLAYER){
@@ -310,7 +308,6 @@ ErrorCode error = ErrorCode::OK;
         checkForError(playerPtr->m_removeGameObjects(GameObject::Longevity::ONE_ROUND_LONG), error);
     }
 
-    RoundData tmp; // Reset the round data to its default state. It is assumed that the round data is being moved to the round history before this call. In particular, std::move has been called already.
     // Determine points before (!) resetting the round data.
     auto points = m_roundData->m_determinePoints();
     dumpData = std::move(m_roundData);
