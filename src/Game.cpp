@@ -58,6 +58,9 @@ void Game::m_init(){
     if(m_gameData.error != ErrorCode::OK){
         std::cout<<"Init player UI fail: "<<toString(m_gameData.error)<<std::endl;
     }
+    ScaleSet::ScaleSetDataRecipe scaleSetDataRecipe = m_generateNextScaleSetDataRecipe();
+    m_guessingDataCreator = std::make_unique<GuessingDataCreator>(scaleSetDataRecipe);
+
 }
 
 ErrorCode Game::m_simpleTest(){
@@ -188,7 +191,7 @@ ErrorCode Game::m_initRound(){
     for(auto& player: m_playerList){
         checkForError(player->m_prepareForNewRound(), error);
     }
-    checkForError(m_currentRound->m_initRound(), error);
+    checkForError(m_currentRound->m_initRound(m_guessingDataCreator.get()), error);
     checkForError(m_eventHandler->m_updateDisplaying(), error);
     return error;
 }
@@ -352,4 +355,13 @@ const Round::RoundData& Game::m_RoundData() const{
     if(!m_currentRound)
         throw std::runtime_error("No current round available!");
     return m_currentRound->m_RoundData();
+}
+
+ScaleSet::ScaleSetDataRecipe Game::m_generateNextScaleSetDataRecipe(){
+    ScaleSet::ScaleSetDataRecipe recipe;
+    std::map<ScaleSet::ScaleType, int> typeCounts;
+    typeCounts[ScaleSet::ScaleType::OPPOSITE] = 2;
+    typeCounts[ScaleSet::ScaleType::RANDOM_PAIR] = 1;
+    recipe = ScaleSet::ScaleSetDataRecipe(typeCounts);
+    return recipe;
 }

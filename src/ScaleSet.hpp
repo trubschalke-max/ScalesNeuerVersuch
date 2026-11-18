@@ -13,12 +13,6 @@ struct WordPair;
 class ScaleSet //From now on, this class will manage a collection of Scale objects based on the provided ScaleSetDataRecipe. The round will hold one ScaleSet.
 {
 public:
-    struct WordPairForScale
-    {
-        std::string above;
-        std::string below;
-        WordPairForScale(const WordPair& wp);
-    };
     enum ScaleType //Maybe, I have to extend this by further information, like mutability or topics.
     {
         OPPOSITE, RANDOM_PAIR
@@ -35,17 +29,20 @@ public:
         ScaleSetDataRecipe() = default; // Default constructor
         ScaleSetDataRecipe(std::map<ScaleType, int>, ObjectData::ScaleValue maxValue = ObjectData::ScaleValue::SCALE_CANONICAL_END, ObjectData::ScaleValue minValue = ObjectData::ScaleValue::SCALE_CANONICAL_START);
     };
+    struct WordPairForScale
+    {
+        std::string above;
+        std::string below;
+        WordPairForScale(const WordPair& wp);
+    };
 private:
-    RandomWordRetriever* m_randomWordRetriever;
-    std::vector<std::unique_ptr<Scale>> scales;
-    std::vector<Scale*> rawScales;
-    std::unique_ptr<Scale> m_makeScale(const ScaleRecipe& recipe);
-    WordPairForScale m_acquireWordPair(ScaleType type); //This will redirect to the GuessingDataCreator to acquire a word pair for the given scale type.
+    std::vector<std::unique_ptr<Scale>> m_scales;
+    std::vector<Scale*> m_rawScales;
 
 public:
-    ScaleSet(ScaleSetDataRecipe& sdr, RandomWordRetriever* randomWordRetriever);
+    ScaleSet();
     ~ScaleSet();
-    const std::vector<Scale*>& getRawScales() const { return rawScales; }
+    const std::vector<Scale*>& m_getRawScales() const { return m_rawScales; }
 };
 
 #endif

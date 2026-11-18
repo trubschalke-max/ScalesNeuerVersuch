@@ -57,6 +57,7 @@ private:
     ObjectData::PlayerID m_currentPlayerID(){return (ObjectData::PlayerID)(m_RoundHistory().size() % m_gameData.numberOfPlayers + 1);} //This refers to the current explaining player.
     ErrorCode m_killGame(){std::cout<<"Game killed"<<std::endl; return ErrorCode::OK;} //In a complete implementation, this would handle cleanup and finalization of the game. 
     ErrorCode m_confirmRoundReadiness(); //Confirms the readiness of the current round.
+    ScaleSet::ScaleSetDataRecipe m_generateNextScaleSetDataRecipe(); //This generates a scale set data recipe for the upcoming round. In the future, this might be more complex and involve some kind of game state analysis or player performance tracking.
     
     const auto& m_Data(){return m_gameData;}
     const Round::RoundData& m_RoundData() const;

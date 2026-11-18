@@ -69,7 +69,7 @@ public:
     Round(int nr, PlayerID explainingPlayer, const std::vector<PlayerID>& players, unsigned short int scalesCount, unsigned short int explainablesCount, unsigned short int scaleMaxValue = (int) ScaleValue::SCALE_CANONICAL_END); //The scaleSize parameter 
     ~Round();
     const RoundData& m_RoundData() { return *m_roundData; } 
-    ErrorCode m_initRound(); // This creates the explainable set and scales for the round. It does NOT create the players' game objects.
+    ErrorCode m_initRound(GuessingDataCreator* guessingDataCreator); // This creates the explainable set and scales for the round. It does NOT create the players' game objects.
     ErrorCode m_validate(const Suggestor::Suggestion&); //If the suggestion is valid, returns ErrorCode::OK, if it means nothing, it returns ErrorCode::IGNORE_THIS, otherwise returns an appropriate error code.
     bool m_isRoundFinished(); // I guess that this will return true on the correct explainable being selected. Right now, it will always return false.
     ErrorCode m_confirmReadiness(); //This function confirms the readiness of all scales and explainable sets associated with the round - in theory. In practice, I will merely set the readiness flags of the scales to true.

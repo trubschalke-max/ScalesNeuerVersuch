@@ -1,6 +1,7 @@
 #include "Round.hpp"
 #include "ExplainableSet.hpp"
 #include <algorithm>
+#include "GuessingDataCreator.hpp"
 
 // C++ program to generate a random number in a range
 
@@ -49,7 +50,9 @@ std::vector<ObjectData::ScaleData> Round::m_generateScaleData(){//For now, a tem
     return scaleData;
 }
 
-ErrorCode Round::m_initRound(){
+ErrorCode Round::m_initRound(GuessingDataCreator* guessingDataCreator){//This function initializes the round by creating the explainable set and scale set. It does not create the players' game objects, which is handled elsewhere.
+    //I need to create the explainable set and the scale set, and then create the recipes for the round elements.
+
     throw std::runtime_error("Round initialization not implemented yet.");
     return ErrorCode::OK;
 }
